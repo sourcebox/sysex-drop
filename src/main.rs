@@ -261,6 +261,7 @@ impl epi::App for App {
                             .clamp_range(std::ops::RangeInclusive::new(0, 500))
                             .speed(1.0),
                     );
+                    ui.label("ms");
                 });
             });
 
