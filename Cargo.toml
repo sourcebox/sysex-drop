@@ -1,0 +1,21 @@
+[package]
+authors = ["Oliver Rockstedt <info@sourcebox.de>"]
+description = "Drag-and-drop MIDI SysEx dump utility"
+edition = "2018"
+license = "MIT"
+name = "sysex-drop"
+version = "0.1.0"
+
+[dependencies]
+eframe = {git = "https://github.com/emilk/egui", rev = "105b999cb66c1dfe609a74767ead1597696d27db", features = ["persistence"]}
+log = {version = "0.4", features = ["max_level_debug", "release_max_level_info"]}
+midir = "0.7"
+serde = {version = "1", features = ["derive"], optional = true}
+simple_logger = "1.11"
+
+[features]
+default = ["persistence"]
+persistence = ["eframe/persistence", "serde"]
+
+[profile.release]
+lto = true
