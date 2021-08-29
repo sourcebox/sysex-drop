@@ -210,15 +210,17 @@ impl epi::App for App {
                                     ui.label("Drop file to open");
                                 });
                         } else if self.file_path.is_some() {
+                            let basename = self.file_path.as_ref().unwrap().file_name().unwrap();
                             egui::Grid::new("file_info").show(ui, |ui| {
                                 ui.label("File:");
-                                ui.label(
-                                    self.file_path
-                                        .as_ref()
-                                        .unwrap()
-                                        .to_str()
-                                        .unwrap_or("Filename contains invalid characters."),
-                                );
+                                ui.label(basename.to_str().unwrap_or("Invalid filename"))
+                                    .on_hover_text(
+                                        self.file_path
+                                            .as_ref()
+                                            .unwrap()
+                                            .to_str()
+                                            .unwrap_or("Invalid filename"),
+                                    );
                                 ui.end_row();
                                 ui.label("Size:");
                                 ui.label(format!("{}", self.file_size));
