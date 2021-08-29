@@ -28,4 +28,4 @@ icon = [
 ]
 identifier = "de.sourcebox.sysex-drop"
 name = "SysEx Drop"
-osx_minimum_system_version = "10.11"
+osx_minimum_system_version = "10.8"
