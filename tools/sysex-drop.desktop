@@ -1,7 +1,7 @@
 [Desktop Entry]
 Categories=Utility;
 Icon=sysex-drop
-Name=sysex-drop
+Name=SysEx Drop
 Type=Application
 Exec=sysex-drop
 Name[de_DE]=sysex-drop.desktop
