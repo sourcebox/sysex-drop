@@ -19,3 +19,13 @@ persistence = ["eframe/persistence", "serde"]
 
 [profile.release]
 lto = true
+
+[package.metadata.bundle]
+icon = [
+  "icons/32x32/sysex-drop.png",
+  "icons/128x128/sysex-drop.png",
+  "icons/256x256/sysex-drop.png",
+]
+identifier = "de.sourcebox.sysex-drop"
+name = "SysEx Drop"
+osx_minimum_system_version = "10.11"
