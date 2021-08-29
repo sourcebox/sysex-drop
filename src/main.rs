@@ -147,6 +147,7 @@ impl epi::App for App {
     /// Called by the frame work to save state before shutdown
     #[cfg(feature = "persistence")]
     fn save(&mut self, storage: &mut dyn epi::Storage) {
+        log::debug!("Saving persistent data.");
         epi::set_value(storage, epi::APP_KEY, self);
     }
 
@@ -157,7 +158,9 @@ impl epi::App for App {
         _frame: &mut epi::Frame<'_>,
         storage: Option<&dyn epi::Storage>,
     ) {
+        #[cfg(feature = "persistence")]
         if let Some(storage) = storage {
+            log::debug!("Loading persistent data.");
             *self = epi::get_value(storage, epi::APP_KEY).unwrap_or_default()
         }
 
