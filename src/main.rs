@@ -226,14 +226,16 @@ impl epi::App for App {
                                     );
                                 ui.end_row();
                                 ui.label("Size:");
-                                ui.label(format!("{}", self.file_size));
+                                ui.label(format!("{}", self.file_size))
+                                    .on_hover_text("File size in bytes");
                                 ui.end_row();
                                 ui.label("Packets:");
-                                ui.label(format!("{}", self.file_packet_count));
+                                ui.label(format!("{}", self.file_packet_count))
+                                    .on_hover_text("Total number of packets in file");
                                 ui.end_row();
                             });
                         } else {
-                            ui.label("Drop a sysex file here");
+                            ui.label("Drop a sysex file here!");
                         }
                     });
 
@@ -284,10 +286,18 @@ impl epi::App for App {
                     );
                     ui.centered_and_justified(|ui| {
                         if self.transfer_state != TransferState::Running {
-                            if ui.button("Start").clicked() {
+                            if ui
+                                .button("Start")
+                                .on_hover_text("Send file to the device")
+                                .clicked()
+                            {
                                 self.message_channel.0.send(Message::StartTransfer).ok();
                             };
-                        } else if ui.button("Cancel").clicked() {
+                        } else if ui
+                            .button("Cancel")
+                            .on_hover_text("Cancel file transfer")
+                            .clicked()
+                        {
                             self.transmit_thread_sender
                                 .as_ref()
                                 .unwrap()
@@ -320,10 +330,16 @@ impl epi::App for App {
                             ui.add(egui::Label::new("Transfer in progress."));
                         }
                         TransferState::Finished => {
-                            ui.add(egui::Label::new("Finished.").text_color(egui::Color32::GREEN));
+                            ui.add(
+                                egui::Label::new("Transfer finished.")
+                                    .text_color(egui::Color32::GREEN),
+                            );
                         }
                         TransferState::Cancelled => {
-                            ui.add(egui::Label::new("Cancelled.").text_color(egui::Color32::RED));
+                            ui.add(
+                                egui::Label::new("Transfer cancelled.")
+                                    .text_color(egui::Color32::RED),
+                            );
                         }
                     }
                 }
@@ -499,7 +515,11 @@ pub fn device_selection(
         });
 
         ui.centered_and_justified(|ui| {
-            if ui.button("Rescan").clicked() {
+            if ui
+                .button("Rescan")
+                .on_hover_text("Search for new MIDI devices")
+                .clicked()
+            {
                 message_sender.send(Message::RescanDevices).ok();
             };
         });
