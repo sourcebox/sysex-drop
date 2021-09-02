@@ -263,7 +263,7 @@ impl epi::App for App {
                     ui.label("Delay between packets:");
                     ui.add(
                         egui::DragValue::new(&mut self.packet_interval)
-                            .clamp_range(std::ops::RangeInclusive::new(0, 500))
+                            .clamp_range(std::ops::RangeInclusive::new(1, 500))
                             .speed(1.0),
                     );
                     ui.label("ms");
