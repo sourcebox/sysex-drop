@@ -351,6 +351,7 @@ impl epi::App for App {
             ui.horizontal(|ui| {
                 ui.label(format!("v{}", &env!("CARGO_PKG_VERSION")));
                 egui::warn_if_debug_build(ui);
+                ui.hyperlink_to("Project homepage", env!("CARGO_PKG_HOMEPAGE"));
             });
         });
     }

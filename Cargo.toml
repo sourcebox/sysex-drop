@@ -2,8 +2,10 @@
 authors = ["Oliver Rockstedt <info@sourcebox.de>"]
 description = "Drag-and-drop MIDI SysEx dump utility"
 edition = "2018"
+homepage = "https://github.com/sourcebox/sysex-drop"
 license = "MIT"
 name = "sysex-drop"
+repository = "https://github.com/sourcebox/sysex-drop"
 version = "0.1.0"
 
 [dependencies]
