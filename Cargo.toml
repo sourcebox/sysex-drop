@@ -9,7 +9,7 @@ repository = "https://github.com/sourcebox/sysex-drop"
 version = "0.1.0"
 
 [dependencies]
-eframe = {git = "https://github.com/emilk/egui", rev = "105b999cb66c1dfe609a74767ead1597696d27db", features = ["persistence"]}
+eframe = {git = "https://github.com/emilk/egui", rev = "19eed94499f7b736a5885e33dd94d91692e7f789", features = ["persistence"]}
 log = {version = "0.4", features = ["max_level_debug", "release_max_level_info"]}
 midir = "0.7"
 serde = {version = "1", features = ["derive"], optional = true}
