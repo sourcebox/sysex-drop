@@ -17,6 +17,7 @@ jobs:
       run: |
         export DEBIAN_FRONTED=noninteractive
         sudo apt-get -qq update
+        sudo apt-get install libxcb-render0-dev libxcb-shape0-dev libxcb-xfixes0-dev libxkbcommon-dev
         sudo apt-get install libasound2-dev
     - name: Install cargo-deb
       run: cargo install cargo-deb
