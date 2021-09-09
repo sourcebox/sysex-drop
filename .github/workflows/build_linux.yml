@@ -19,16 +19,25 @@ jobs:
         sudo apt-get -qq update
         sudo apt-get install libxcb-render0-dev libxcb-shape0-dev libxcb-xfixes0-dev libxkbcommon-dev
         sudo apt-get install libasound2-dev
+    - name: Install LinuxDeploy
+      uses: miurahr/install-linuxdeploy-action@v1
+      with:
+        plugins: appimage
     - name: Install cargo-deb
       run: cargo install cargo-deb
-    - name: Build
-      run: cargo build --release
+    - name: Build AppImage
+      run: ./build-linux-appimage.sh
+    - name: Archive AppImage
+      uses: actions/upload-artifact@v2
+      with:
+        name: sysex-drop-x86_64.AppImage
+        path: target/release/appimage/sysex-drop-x86_64.AppImage
     - name: Pack .deb package
       run: cargo deb --no-build
     - name: Rename .deb package
-      run: mv target/debian/*.deb target/debian/sysex_drop-x86_64-debian-linux-gnu.deb
+      run: mv target/debian/*.deb target/debian/sysex-drop-x86_64.deb
     - name: Archive .deb package
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v2
       with:
-        name: sysex_drop-x86_64-debian-linux-gnu
-        path: target/debian/sysex_drop-x86_64-debian-linux-gnu.deb
+        name: sysex-drop-x86_64.deb
+        path: target/debian/sysex-drop-x86_64.deb

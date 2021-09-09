@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cargo build --release
+#cargo build --release
 
 rm -rf target/release/appimage/*
 
@@ -17,4 +17,4 @@ linuxdeploy-x86_64.AppImage \
     --output appimage
 
 echo "Moving appimage to target directory"
-mv *.AppImage ./target/release/appimage/
+mv *.AppImage ./target/release/appimage/sysex-drop-x86_64.AppImage
