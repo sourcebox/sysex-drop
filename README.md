@@ -19,7 +19,6 @@ On Linux, a couple of additional dependencies must be installed:
     - libxcb-render0-dev
     - libxcb-shape0-dev
     - libxcb-xfixes0-dev
-    - libspeechd-dev
     - libxkbcommon-dev
 
 ### Mac Application Bundle (optional)
