@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#cargo build --release
+cargo build --release
 
 rm -rf target/release/appimage/*
 
