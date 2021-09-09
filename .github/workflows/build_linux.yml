@@ -14,6 +14,20 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Install Requirements
-      run: apt-get install libasound2-dev
+      run: |
+        export DEBIAN_FRONTED=noninteractive
+        sudo apt-get -qq update
+        sudo apt-get install libasound2-dev
+    - name: Install cargo-deb
+      run: cargo install cargo-deb
     - name: Build
-      run: cargo build
+      run: cargo build --release
+    - name: Pack .deb package
+      run: cargo deb --no-build
+    - name: Rename .deb package
+      run: mv target/debian/*.deb target/debian/sysex_drop-x86_64-debian-linux-gnu.deb
+    - name: Archive .deb package
+      uses: actions/upload-artifact@v1
+      with:
+        name: sysex_drop-x86_64-debian-linux-gnu
+        path: target/debian/sysex_drop-x86_64-debian-linux-gnu.deb
