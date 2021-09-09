@@ -13,5 +13,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: Install Requirements
+      run: apt-get install libasound2-dev
     - name: Build
       run: cargo build
