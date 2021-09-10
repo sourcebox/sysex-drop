@@ -11,12 +11,17 @@ jobs:
 
     runs-on: windows-latest
 
+    env:
+      PROJECT_NAME: ${{ github.event.repository.name }}
+
     steps:
     - uses: actions/checkout@v2
+
     - name: Build
       run: cargo build --release
+
     - name: Archive .exe
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v2
       with:
-        name: sysex-drop-x86_64-pc-windows-msvc
-        path: target/release/sysex-drop.exe
+        name: ${{ env.PROJECT_NAME }}-x86_64-pc-windows-msvc
+        path: target/release/*.exe
