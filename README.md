@@ -8,7 +8,7 @@
 
 ## Usage
 
-Just drop a file onto the application window and press the **Start** button. The SysEx data from the file is then sent in individual packages. The delay between the packets is adjustable from 0 to 500ms with a default of 20ms. If the receiving device does not recognize the data correctly, try to increase the delay setting.
+Just drop a file onto the application window and press the **Start** button. The SysEx data from the file is then sent in individual packages. The delay between the packets is adjustable from 1 to 500ms with a default of 20ms. If the receiving device does not recognize the data correctly, try to increase the delay setting.
 
 ## Building from Source
 
