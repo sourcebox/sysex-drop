@@ -17,11 +17,20 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+    - name: Install cargo-wix
+      run: cargo install cargo-wix
+
     - name: Build
       run: cargo build --release
 
     - name: Archive .exe
       uses: actions/upload-artifact@v2
       with:
-        name: ${{ env.PROJECT_NAME }}-x86_64-pc-windows-msvc
+        name: ${{ env.PROJECT_NAME }}-x86_64-pc-windows-msvc.exe
         path: target/release/*.exe
+
+    - name: Archive .msi
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ env.PROJECT_NAME }}-x86_64-pc-windows-msvc.msi
+        path: target/wix/*.msi
