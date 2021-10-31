@@ -7,7 +7,7 @@ license = "MIT"
 name = "sysex-drop"
 repository = "https://github.com/sourcebox/sysex-drop"
 rust-version = "1.56"
-version = "0.1.0"
+version = "1.0.0"
 
 [dependencies]
 eframe = {version = "0.15", features = ["persistence"]}
