@@ -235,7 +235,7 @@ impl epi::App for App {
                                 ui.end_row();
                             });
                         } else {
-                            ui.label("Drop a sysex file here!");
+                            ui.label("Drop a SysEx file here!");
                         }
                     });
 
@@ -267,7 +267,8 @@ impl epi::App for App {
                         egui::DragValue::new(&mut self.packet_interval)
                             .clamp_range(std::ops::RangeInclusive::new(1, 500))
                             .speed(1.0),
-                    );
+                    )
+                    .on_hover_text("Hold SHIFT while dragging\n for fine-adjustments");
                     ui.label("ms");
                 });
             });
@@ -520,7 +521,7 @@ pub fn device_selection(
         ui.centered_and_justified(|ui| {
             if ui
                 .button("Rescan")
-                .on_hover_text("Search for new MIDI devices")
+                .on_hover_text("Search for new MIDI devices\n and update device list")
                 .clicked()
             {
                 message_sender.send(Message::RescanDevices).ok();
