@@ -1,5 +1,4 @@
-//! Cross-platform utility for dumping sysex files via drag-and-drop GUI
-
+#![doc = include_str!("../README.md")]
 #![windows_subsystem = "windows"]
 
 mod midi;
@@ -9,8 +8,10 @@ use simple_logger::SimpleLogger;
 use std::io::{BufRead, BufReader, Seek};
 use std::sync::{Arc, Mutex};
 
+/// Result type with dynamic error variants
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
+/// Size of the native application window
 const WINDOW_SIZE: egui::Vec2 = egui::vec2(400.0, 300.0);
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -34,6 +35,7 @@ fn main() {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+/// Application data and state
 #[cfg_attr(feature = "persistence", derive(serde::Deserialize, serde::Serialize))]
 #[cfg_attr(feature = "persistence", serde(default))]
 pub struct App {
@@ -59,7 +61,7 @@ pub struct App {
     #[cfg_attr(feature = "persistence", serde(skip))]
     transfer_state: TransferState,
 
-    /// Transfer progress
+    /// Transfer progress in range 0..1, representing 0..100%
     #[cfg_attr(feature = "persistence", serde(skip))]
     transfer_progress: f32,
 
@@ -71,7 +73,7 @@ pub struct App {
     #[cfg_attr(feature = "persistence", serde(skip))]
     error_message: Option<String>,
 
-    /// Message channel
+    /// Channel for passing event messages
     #[cfg_attr(feature = "persistence", serde(skip))]
     message_channel: (
         std::sync::mpsc::Sender<Message>,
@@ -82,14 +84,14 @@ pub struct App {
     #[cfg_attr(feature = "persistence", serde(skip))]
     transmit_thread_sender: Option<std::sync::mpsc::Sender<bool>>,
 
-    /// Update frame count
+    /// Frame count, incremented on each update() call
     #[cfg_attr(feature = "persistence", serde(skip))]
     frame_count: u64,
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-/// Messages for application actions
+/// Event messages for application actions
 #[derive(Debug, Clone)]
 pub enum Message {
     /// Force rescanning of devices
@@ -101,7 +103,7 @@ pub enum Message {
     /// Start the transfer
     StartTransfer,
 
-    /// Packet transferred
+    /// Packet with number transferred
     PacketTransferred(usize),
 
     /// Transfer finished successfully
@@ -110,7 +112,7 @@ pub enum Message {
     /// Transfer cancelled
     TransferCancelled,
 
-    /// Error
+    /// Error with text message
     Error(String),
 }
 
@@ -119,9 +121,16 @@ pub enum Message {
 /// Transfer states
 #[derive(PartialEq)]
 pub enum TransferState {
+    /// Initial state
     Idle,
+
+    /// Transfer is in progress
     Running,
+
+    /// Transfer is finished
     Finished,
+
+    /// Transfer was cancelled
     Cancelled,
 }
 
@@ -377,7 +386,7 @@ impl epi::App for App {
 }
 
 impl App {
-    /// Process a message
+    /// Process an event message
     fn process_message(&mut self, message: &Message) {
         match message {
             Message::RescanDevices => {
@@ -437,7 +446,7 @@ impl App {
         }
     }
 
-    /// Process file
+    /// Process the file dropped onto the window
     fn process_file(&mut self, path: &std::path::Path) -> Result<()> {
         // Reset file info initially
         self.file_path = None;
@@ -546,6 +555,7 @@ pub fn device_selection(
     });
 }
 
+/// Sends the SysEx data, called in separate thread
 fn send_sysex(
     file_path: std::path::PathBuf,
     midi: Arc<Mutex<midi::MidiConnector>>,
@@ -582,12 +592,13 @@ fn send_sysex(
 
 ////////////////////////////////////////////////////////////////////////////////
 
+/// Errors with associated messages
 #[derive(Debug)]
 pub enum Error {
-    /// Sysex start byte not found
+    /// Sysex start byte not found in file
     NoStartByte,
 
-    /// Sysex end byte not found
+    /// Sysex end byte not found in file
     NoEndByte,
 
     /// File does not contain any packets
