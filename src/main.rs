@@ -170,15 +170,6 @@ impl epi::App for App {
             log::debug!("Loading persistent data.");
             *self = epi::get_value(storage, epi::APP_KEY).unwrap_or_default()
         }
-
-        self.message_channel.0.send(Message::RescanDevices).ok();
-
-        if let Some(device) = &self.selected_device {
-            self.message_channel
-                .0
-                .send(Message::SelectDevice(device.to_owned()))
-                .ok();
-        }
     }
 
     /// Called each time the UI needs repainting, which may be many times per second.
@@ -190,9 +181,20 @@ impl epi::App for App {
             self.process_message(&message);
         }
 
-        // Set window size on first frame
         if self.frame_count == 0 {
+            // Set window size on first frame
             frame.set_window_size(WINDOW_SIZE);
+        } else if self.frame_count == 1 {
+            // Scan MIDI devices on second frame instead of first
+            // This makes the GUI show up faster
+            self.message_channel.0.send(Message::RescanDevices).ok();
+
+            if let Some(device) = &self.selected_device {
+                self.message_channel
+                    .0
+                    .send(Message::SelectDevice(device.to_owned()))
+                    .ok();
+            }
         }
 
         egui::CentralPanel::default().show(ctx, |ui| {
