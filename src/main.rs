@@ -11,6 +11,8 @@ use std::sync::{Arc, Mutex};
 
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
+const WINDOW_SIZE: egui::Vec2 = egui::vec2(400.0, 300.0);
+
 ////////////////////////////////////////////////////////////////////////////////
 
 /// Starts the application
@@ -22,7 +24,7 @@ fn main() {
 
     let app = App::default();
     let native_options = eframe::NativeOptions {
-        initial_window_size: Some(egui::vec2(400.0, 300.0)),
+        initial_window_size: Some(WINDOW_SIZE),
         resizable: false,
         drag_and_drop_support: true,
         ..eframe::NativeOptions::default()
@@ -79,6 +81,10 @@ pub struct App {
     /// MPSC sender to cancel the transmit thread
     #[cfg_attr(feature = "persistence", serde(skip))]
     transmit_thread_sender: Option<std::sync::mpsc::Sender<bool>>,
+
+    /// Update frame count
+    #[cfg_attr(feature = "persistence", serde(skip))]
+    frame_count: u64,
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -135,6 +141,7 @@ impl Default for App {
             error_message: None,
             message_channel: std::sync::mpsc::channel(),
             transmit_thread_sender: None,
+            frame_count: 0,
         }
     }
 }
@@ -175,12 +182,17 @@ impl epi::App for App {
     }
 
     /// Called each time the UI needs repainting, which may be many times per second.
-    fn update(&mut self, ctx: &egui::CtxRef, _frame: &mut epi::Frame<'_>) {
+    fn update(&mut self, ctx: &egui::CtxRef, frame: &mut epi::Frame<'_>) {
         // Continuous run mode is required for message processing
         ctx.request_repaint();
 
         while let Ok(message) = self.message_channel.1.try_recv() {
             self.process_message(&message);
+        }
+
+        // Set window size on first frame
+        if self.frame_count == 0 {
+            frame.set_window_size(WINDOW_SIZE);
         }
 
         egui::CentralPanel::default().show(ctx, |ui| {
@@ -357,6 +369,8 @@ impl epi::App for App {
                 });
             });
         });
+
+        self.frame_count += 1;
     }
 }
 
