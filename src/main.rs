@@ -19,6 +19,7 @@ const WINDOW_SIZE: egui::Vec2 = egui::vec2(400.0, 300.0);
 /// Starts the application
 fn main() {
     SimpleLogger::new()
+        .with_utc_timestamps()
         .with_level(log::LevelFilter::Debug)
         .init()
         .unwrap();
