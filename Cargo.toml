@@ -10,7 +10,7 @@ rust-version = "1.56"
 version = "1.0.0"
 
 [dependencies]
-eframe = {version = "0.15", features = ["persistence"]}
+eframe = {version = "0.16", features = ["persistence"]}
 log = {version = "0.4", features = ["max_level_debug", "release_max_level_info"]}
 midir = "0.7"
 serde = {version = "1", features = ["derive"], optional = true}

@@ -171,7 +171,7 @@ impl epi::App for App {
     fn setup(
         &mut self,
         _ctx: &egui::CtxRef,
-        _frame: &mut epi::Frame<'_>,
+        _frame: &epi::Frame,
         storage: Option<&dyn epi::Storage>,
     ) {
         #[cfg(feature = "persistence")]
@@ -182,7 +182,7 @@ impl epi::App for App {
     }
 
     /// Called each time the UI needs repainting, which may be many times per second.
-    fn update(&mut self, ctx: &egui::CtxRef, frame: &mut epi::Frame<'_>) {
+    fn update(&mut self, ctx: &egui::CtxRef, frame: &epi::Frame) {
         // Continuous run mode is required for message processing
         ctx.request_repaint();
 
@@ -336,34 +336,34 @@ impl epi::App for App {
 
             ui.vertical_centered(|ui| {
                 if let Some(error_message) = &self.error_message {
-                    ui.add(
-                        egui::Label::new(format!("Error: {}", error_message))
-                            .text_color(egui::Color32::RED),
-                    );
+                    ui.add(egui::Label::new(
+                        egui::RichText::new(format!("Error: {}", error_message))
+                            .color(egui::Color32::RED),
+                    ));
                 } else if self.file_path.is_none() {
                     ui.add(egui::Label::new("No file selected."));
                 } else {
                     match self.transfer_state {
                         TransferState::Idle => {
-                            ui.add(
-                                egui::Label::new("Press start to send the file.")
-                                    .text_color(egui::Color32::YELLOW),
-                            );
+                            ui.add(egui::Label::new(
+                                egui::RichText::new("Press start to send the file.")
+                                    .color(egui::Color32::YELLOW),
+                            ));
                         }
                         TransferState::Running => {
                             ui.add(egui::Label::new("Transfer in progress."));
                         }
                         TransferState::Finished => {
-                            ui.add(
-                                egui::Label::new("Transfer finished.")
-                                    .text_color(egui::Color32::GREEN),
-                            );
+                            ui.add(egui::Label::new(
+                                egui::RichText::new("Transfer finished.")
+                                    .color(egui::Color32::GREEN),
+                            ));
                         }
                         TransferState::Cancelled => {
-                            ui.add(
-                                egui::Label::new("Transfer cancelled.")
-                                    .text_color(egui::Color32::RED),
-                            );
+                            ui.add(egui::Label::new(
+                                egui::RichText::new("Transfer cancelled.")
+                                    .color(egui::Color32::RED),
+                            ));
                         }
                     }
                 }
