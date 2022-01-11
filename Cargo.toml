@@ -1,13 +1,13 @@
 [package]
-authors = ["Oliver Rockstedt <info@sourcebox.de>"]
-description = "Drag-and-drop MIDI SysEx dump utility"
-edition = "2021"
-homepage = "https://github.com/sourcebox/sysex-drop"
-license = "MIT"
 name = "sysex-drop"
-repository = "https://github.com/sourcebox/sysex-drop"
-rust-version = "1.56"
 version = "1.0.0"
+authors = ["Oliver Rockstedt <info@sourcebox.de>"]
+license = "MIT"
+edition = "2021"
+rust-version = "1.56"
+description = "Drag-and-drop MIDI SysEx dump utility"
+homepage = "https://github.com/sourcebox/sysex-drop"
+repository = "https://github.com/sourcebox/sysex-drop"
 
 [dependencies]
 eframe = {version = "0.16", features = ["persistence"]}
