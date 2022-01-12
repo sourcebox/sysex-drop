@@ -44,6 +44,10 @@ pub struct App {
     #[cfg_attr(feature = "persistence", serde(skip))]
     file_path: Option<std::path::PathBuf>,
 
+    /// File type
+    #[cfg_attr(feature = "persistence", serde(skip))]
+    file_type: Option<FileType>,
+
     /// File size in bytes
     #[cfg_attr(feature = "persistence", serde(skip))]
     file_size: u64,
@@ -91,6 +95,15 @@ pub struct App {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+
+/// File type
+pub enum FileType {
+    // Raw SysEx file
+    SysEx,
+
+    // Standard MIDI file
+    SMF,
+}
 
 /// Event messages for application actions
 #[derive(Debug, Clone)]
@@ -141,6 +154,7 @@ impl Default for App {
     fn default() -> Self {
         Self {
             file_path: None,
+            file_type: None,
             file_size: 0,
             file_packet_count: 0,
             selected_device: None,
@@ -451,31 +465,52 @@ impl App {
     fn process_file(&mut self, path: &std::path::Path) -> Result<()> {
         // Reset file info initially
         self.file_path = None;
+        self.file_type = None;
         self.file_size = 0;
         self.file_packet_count = 0;
 
+        let extension = path.extension().and_then(std::ffi::OsStr::to_str);
+        let file_type = match extension {
+            Some(ext) if ext == "mid" => FileType::SMF,
+            _ => FileType::SysEx,
+        };
+
         let mut file = std::fs::File::open(path.to_path_buf())?;
         let file_size = file.seek(std::io::SeekFrom::End(0))?;
-
         file.seek(std::io::SeekFrom::Start(0))?;
 
-        let mut buf_reader = BufReader::new(file);
         let mut packet_count = 0;
 
-        loop {
-            let mut data = Vec::new();
-            let data_length = buf_reader.read_until(midi::SYSEX_END_BYTE, &mut data)?;
-            if data_length == 0 {
-                // End of file
-                break;
+        match file_type {
+            FileType::SysEx => {
+                let mut buf_reader = BufReader::new(file);
+                loop {
+                    let mut data = Vec::new();
+                    let data_length = buf_reader.read_until(midi::SYSEX_END_BYTE, &mut data)?;
+                    if data_length == 0 {
+                        // End of file
+                        break;
+                    }
+                    if data[0] != midi::SYSEX_START_BYTE {
+                        return Err(Box::new(Error::NoStartByte));
+                    }
+                    if data[data_length - 1] != midi::SYSEX_END_BYTE {
+                        return Err(Box::new(Error::NoEndByte));
+                    }
+                    packet_count += 1;
+                }
             }
-            if data[0] != midi::SYSEX_START_BYTE {
-                return Err(Box::new(Error::NoStartByte));
+            FileType::SMF => {
+                let content = std::fs::read(path)?;
+                let smf = midly::Smf::parse(&content)?;
+                for track in smf.tracks {
+                    for event in track {
+                        if let midly::TrackEventKind::SysEx(_) = event.kind {
+                            packet_count += 1;
+                        }
+                    }
+                }
             }
-            if data[data_length - 1] != midi::SYSEX_END_BYTE {
-                return Err(Box::new(Error::NoEndByte));
-            }
-            packet_count += 1;
         }
 
         if packet_count == 0 {
@@ -484,6 +519,7 @@ impl App {
 
         // File is valid, so set the info fields
         self.file_path = Some(path.to_path_buf());
+        self.file_type = Some(file_type);
         self.file_size = file_size;
         self.file_packet_count = packet_count;
 
@@ -564,27 +600,64 @@ fn send_sysex(
     message_sender: std::sync::mpsc::Sender<Message>,
     receiver: std::sync::mpsc::Receiver<bool>,
 ) -> Result<bool> {
-    let file = std::fs::File::open(file_path)?;
+    let extension = file_path
+        .as_path()
+        .extension()
+        .and_then(std::ffi::OsStr::to_str);
+    let file_type = match extension {
+        Some(ext) if ext == "mid" => FileType::SMF,
+        _ => FileType::SysEx,
+    };
 
-    let mut buf_reader = BufReader::new(file);
-    let mut packet_count = 0;
+    match file_type {
+        FileType::SysEx => {
+            let file = std::fs::File::open(file_path)?;
 
-    loop {
-        let mut data = Vec::new();
-        let data_length = buf_reader.read_until(midi::SYSEX_END_BYTE, &mut data)?;
-        if data_length == 0 {
-            // End of file
-            break;
+            let mut buf_reader = BufReader::new(file);
+            let mut packet_count = 0;
+
+            loop {
+                let mut data = Vec::new();
+                let data_length = buf_reader.read_until(midi::SYSEX_END_BYTE, &mut data)?;
+                if data_length == 0 {
+                    // End of file
+                    break;
+                }
+                packet_count += 1;
+                message_sender.send(Message::PacketTransferred(packet_count))?;
+
+                midi.lock().unwrap().send(&data);
+
+                std::thread::sleep(packet_interval);
+
+                if receiver.try_recv().is_ok() {
+                    return Ok(false);
+                }
+            }
         }
-        packet_count += 1;
-        message_sender.send(Message::PacketTransferred(packet_count))?;
+        FileType::SMF => {
+            let content = std::fs::read(file_path)?;
+            let smf = midly::Smf::parse(&content)?;
+            let mut packet_count = 0;
 
-        midi.lock().unwrap().send(&data);
+            for track in smf.tracks {
+                for event in track {
+                    if let midly::TrackEventKind::SysEx(data) = event.kind {
+                        let mut message = vec![0xF0];
+                        message.extend_from_slice(data);
+                        packet_count += 1;
+                        message_sender.send(Message::PacketTransferred(packet_count))?;
 
-        std::thread::sleep(packet_interval);
+                        midi.lock().unwrap().send(&message);
 
-        if receiver.try_recv().is_ok() {
-            return Ok(false);
+                        std::thread::sleep(packet_interval);
+
+                        if receiver.try_recv().is_ok() {
+                            return Ok(false);
+                        }
+                    }
+                }
+            }
         }
     }
 

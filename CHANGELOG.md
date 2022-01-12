@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Support for Standard MIDI Files (SMF).
+
 ### Changed
 
 - Updated `eframe` dependency to `0.16`

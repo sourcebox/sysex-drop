@@ -1,6 +1,6 @@
 [package]
 name = "sysex-drop"
-version = "1.0.0"
+version = "1.1.0-beta1"
 authors = ["Oliver Rockstedt <info@sourcebox.de>"]
 license = "MIT"
 edition = "2021"
@@ -13,6 +13,7 @@ repository = "https://github.com/sourcebox/sysex-drop"
 eframe = {version = "0.16", features = ["persistence"]}
 log = {version = "0.4", features = ["max_level_debug", "release_max_level_info"]}
 midir = "0.7"
+midly = "0.5"
 serde = {version = "1", features = ["derive"], optional = true}
 simple_logger = "1"
 
