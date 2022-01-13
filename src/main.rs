@@ -471,7 +471,7 @@ impl App {
 
         let extension = path.extension().and_then(std::ffi::OsStr::to_str);
         let file_type = match extension {
-            Some(ext) if ext == "mid" => FileType::SMF,
+            Some(ext) if ext.to_lowercase() == "mid" => FileType::SMF,
             _ => FileType::SysEx,
         };
 
@@ -605,7 +605,7 @@ fn send_sysex(
         .extension()
         .and_then(std::ffi::OsStr::to_str);
     let file_type = match extension {
-        Some(ext) if ext == "mid" => FileType::SMF,
+        Some(ext) if ext.to_lowercase() == "mid" => FileType::SMF,
         _ => FileType::SysEx,
     };
 
