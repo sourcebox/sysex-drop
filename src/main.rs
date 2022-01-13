@@ -37,23 +37,23 @@ fn main() {
 ////////////////////////////////////////////////////////////////////////////////
 
 /// Application data and state
-#[cfg_attr(feature = "persistence", derive(serde::Deserialize, serde::Serialize))]
-#[cfg_attr(feature = "persistence", serde(default))]
+#[derive(serde::Deserialize, serde::Serialize)]
+#[serde(default)]
 pub struct App {
     /// Selected file path
-    #[cfg_attr(feature = "persistence", serde(skip))]
+    #[serde(skip)]
     file_path: Option<std::path::PathBuf>,
 
     /// File type
-    #[cfg_attr(feature = "persistence", serde(skip))]
+    #[serde(skip)]
     file_type: Option<FileType>,
 
     /// File size in bytes
-    #[cfg_attr(feature = "persistence", serde(skip))]
+    #[serde(skip)]
     file_size: u64,
 
     /// No of packets in file
-    #[cfg_attr(feature = "persistence", serde(skip))]
+    #[serde(skip)]
     file_packet_count: usize,
 
     /// Selected MIDI device
@@ -63,34 +63,34 @@ pub struct App {
     packet_interval: u64,
 
     /// Transfer state
-    #[cfg_attr(feature = "persistence", serde(skip))]
+    #[serde(skip)]
     transfer_state: TransferState,
 
     /// Transfer progress in range 0..1, representing 0..100%
-    #[cfg_attr(feature = "persistence", serde(skip))]
+    #[serde(skip)]
     transfer_progress: f32,
 
     /// MIDI handler
-    #[cfg_attr(feature = "persistence", serde(skip))]
+    #[serde(skip)]
     midi: Arc<Mutex<midi::MidiConnector>>,
 
     /// Last error message
-    #[cfg_attr(feature = "persistence", serde(skip))]
+    #[serde(skip)]
     error_message: Option<String>,
 
     /// Channel for passing event messages
-    #[cfg_attr(feature = "persistence", serde(skip))]
+    #[serde(skip)]
     message_channel: (
         std::sync::mpsc::Sender<Message>,
         std::sync::mpsc::Receiver<Message>,
     ),
 
     /// MPSC sender to cancel the transmit thread
-    #[cfg_attr(feature = "persistence", serde(skip))]
+    #[serde(skip)]
     transmit_thread_sender: Option<std::sync::mpsc::Sender<bool>>,
 
     /// Frame count, incremented on each update() call
-    #[cfg_attr(feature = "persistence", serde(skip))]
+    #[serde(skip)]
     frame_count: u64,
 }
 
@@ -176,7 +176,6 @@ impl epi::App for App {
     }
 
     /// Called by the frame work to save state before shutdown
-    #[cfg(feature = "persistence")]
     fn save(&mut self, storage: &mut dyn epi::Storage) {
         log::debug!("Saving persistent data.");
         epi::set_value(storage, epi::APP_KEY, self);
@@ -189,7 +188,6 @@ impl epi::App for App {
         _frame: &epi::Frame,
         storage: Option<&dyn epi::Storage>,
     ) {
-        #[cfg(feature = "persistence")]
         if let Some(storage) = storage {
             log::debug!("Loading persistent data.");
             *self = epi::get_value(storage, epi::APP_KEY).unwrap_or_default()
