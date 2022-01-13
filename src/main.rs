@@ -192,6 +192,10 @@ impl epi::App for App {
             log::debug!("Loading persistent data.");
             *self = epi::get_value(storage, epi::APP_KEY).unwrap_or_default()
         }
+        self.midi
+            .lock()
+            .unwrap()
+            .init_port_scanner(self.message_channel.0.clone());
     }
 
     /// Called each time the UI needs repainting, which may be many times per second.

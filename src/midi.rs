@@ -1,5 +1,6 @@
 //! Module containing the MIDI-related code
 
+use crate::Message;
 use midir::{MidiOutput, MidiOutputConnection};
 
 /// Sysex message start byte
@@ -32,6 +33,35 @@ impl MidiConnector {
             output: None,
             output_name: String::new(),
         }
+    }
+
+    /// Initialize the periodic port scanner.
+    ///
+    /// `Message::RescanDevices` is send to the `message_sender` mpsc when the
+    /// output port configuration changes.
+    pub fn init_port_scanner(&self, message_sender: std::sync::mpsc::Sender<Message>) {
+        std::thread::spawn(move || {
+            let output =
+                MidiOutput::new(&(env!("CARGO_PKG_NAME").to_owned() + " scanner output")).unwrap();
+            let mut ports: Vec<String> = output
+                .ports()
+                .iter()
+                .map(|item| output.port_name(item).unwrap())
+                .collect();
+            loop {
+                let new_ports: Vec<String> = output
+                    .ports()
+                    .iter()
+                    .map(|item| output.port_name(item).unwrap())
+                    .collect();
+                if ports != new_ports {
+                    log::debug!("MIDI output port configuration changed.");
+                    message_sender.send(Message::RescanDevices).ok();
+                    ports = new_ports;
+                }
+                std::thread::sleep(std::time::Duration::from_millis(500));
+            }
+        });
     }
 
     /// Scans the ports
