@@ -105,6 +105,23 @@ pub enum FileType {
     SMF,
 }
 
+impl FileType {
+    /// Create new file type from path
+    ///
+    /// TODO: check content to detect type, not just extension
+    pub fn from_path(path: &std::path::Path) -> Result<Self> {
+        let extension = path.extension().and_then(std::ffi::OsStr::to_str);
+        let file_type = match extension {
+            Some(ext) if ext.to_lowercase() == "mid" => FileType::SMF,
+            _ => FileType::SysEx,
+        };
+
+        Ok(file_type)
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 /// Event messages for application actions
 #[derive(Debug, Clone)]
 pub enum Message {
@@ -471,11 +488,7 @@ impl App {
         self.file_size = 0;
         self.file_packet_count = 0;
 
-        let extension = path.extension().and_then(std::ffi::OsStr::to_str);
-        let file_type = match extension {
-            Some(ext) if ext.to_lowercase() == "mid" => FileType::SMF,
-            _ => FileType::SysEx,
-        };
+        let file_type = FileType::from_path(path)?;
 
         let mut file = std::fs::File::open(path.to_path_buf())?;
         let file_size = file.seek(std::io::SeekFrom::End(0))?;
@@ -602,14 +615,7 @@ fn send_sysex(
     message_sender: std::sync::mpsc::Sender<Message>,
     receiver: std::sync::mpsc::Receiver<bool>,
 ) -> Result<bool> {
-    let extension = file_path
-        .as_path()
-        .extension()
-        .and_then(std::ffi::OsStr::to_str);
-    let file_type = match extension {
-        Some(ext) if ext.to_lowercase() == "mid" => FileType::SMF,
-        _ => FileType::SysEx,
-    };
+    let file_type = FileType::from_path(file_path.as_path())?;
 
     match file_type {
         FileType::SysEx => {
