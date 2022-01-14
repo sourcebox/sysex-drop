@@ -136,4 +136,10 @@ impl MidiConnector {
             }
         }
     }
+
+    /// Return the name of the selected output
+    #[allow(dead_code)]
+    pub fn output_name(&self) -> Option<String> {
+        self.output.as_ref().map(|_| self.output_name.clone())
+    }
 }

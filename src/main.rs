@@ -231,13 +231,6 @@ impl epi::App for App {
             // Scan MIDI devices on second frame instead of first
             // This makes the GUI show up faster
             self.message_channel.0.send(Message::RescanDevices).ok();
-
-            if let Some(device) = &self.selected_device {
-                self.message_channel
-                    .0
-                    .send(Message::SelectDevice(device.to_owned()))
-                    .ok();
-            }
         }
 
         egui::CentralPanel::default().show(ctx, |ui| {
@@ -424,7 +417,14 @@ impl App {
     fn process_message(&mut self, message: &Message) {
         match message {
             Message::RescanDevices => {
-                self.midi.lock().unwrap().scan_ports();
+                let mut midi = self.midi.lock().unwrap();
+                midi.scan_ports();
+                if let Some(device) = &self.selected_device {
+                    self.message_channel
+                        .0
+                        .send(Message::SelectDevice(device.to_owned()))
+                        .ok();
+                }
             }
             Message::SelectDevice(name) => {
                 log::debug!("Device {} selected.", name);
