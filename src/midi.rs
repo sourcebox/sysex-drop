@@ -37,9 +37,14 @@ impl MidiConnector {
 
     /// Initialize the periodic port scanner.
     ///
+    /// Scans the MIDI outputs in a separate thread every `scan_interval` milliseconds.
     /// `Message::RescanDevices` is send to the `message_sender` mpsc when the
     /// output port configuration changes.
-    pub fn init_port_scanner(&self, message_sender: std::sync::mpsc::Sender<Message>) {
+    pub fn init_port_scanner(
+        &self,
+        scan_interval: u64,
+        message_sender: std::sync::mpsc::Sender<Message>,
+    ) {
         std::thread::spawn(move || {
             let output =
                 MidiOutput::new(&(env!("CARGO_PKG_NAME").to_owned() + " scanner output")).unwrap();
@@ -59,7 +64,7 @@ impl MidiConnector {
                     message_sender.send(Message::RescanDevices).ok();
                     ports = new_ports;
                 }
-                std::thread::sleep(std::time::Duration::from_millis(500));
+                std::thread::sleep(std::time::Duration::from_millis(scan_interval));
             }
         });
     }

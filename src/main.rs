@@ -212,7 +212,7 @@ impl epi::App for App {
         self.midi
             .lock()
             .unwrap()
-            .init_port_scanner(self.message_channel.0.clone());
+            .init_port_scanner(500, self.message_channel.0.clone());
     }
 
     /// Called each time the UI needs repainting, which may be many times per second.
