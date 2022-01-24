@@ -17,6 +17,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated `eframe` dependency to `0.16`
 - Updated `simple_logger` dependency to `2.1`. Now using UTC timestamps.
 
+### Removed
+
+- Rescan button. Device changes are now detected automatically.
+
 ## [1.0.0] - 2021-10-31
 
 First stable release.

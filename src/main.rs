@@ -577,7 +577,7 @@ pub fn device_selection(
             ui.set_enabled(!device_list.is_empty());
 
             let combo_box = egui::ComboBox::from_id_source("device_list")
-                .width(ui.available_width() - 100.0)
+                .width(ui.available_width() - 10.0)
                 .show_index(ui, &mut device_index, device_list.len(), |i| {
                     if device_count > 0 {
                         device_list[i].clone()
@@ -595,16 +595,6 @@ pub fn device_selection(
                             .ok();
                     }
                 }
-            };
-        });
-
-        ui.centered_and_justified(|ui| {
-            if ui
-                .button("Rescan")
-                .on_hover_text("Search for new MIDI devices\n and update device list")
-                .clicked()
-            {
-                message_sender.send(Message::RescanDevices).ok();
             };
         });
     });
