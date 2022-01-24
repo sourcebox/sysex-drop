@@ -1,6 +1,5 @@
 //! Module containing the MIDI-related code
 
-use crate::Message;
 use midir::{MidiOutput, MidiOutputConnection};
 
 /// Sysex message start byte
@@ -35,42 +34,8 @@ impl MidiConnector {
         }
     }
 
-    /// Initialize the periodic port scanner.
-    ///
-    /// Scans the MIDI outputs in a separate thread every `scan_interval` milliseconds.
-    /// `Message::RescanDevices` is send to the `message_sender` mpsc when the
-    /// output port configuration changes.
-    pub fn init_port_scanner(
-        &self,
-        scan_interval: u64,
-        message_sender: std::sync::mpsc::Sender<Message>,
-    ) {
-        std::thread::spawn(move || {
-            let output =
-                MidiOutput::new(&(env!("CARGO_PKG_NAME").to_owned() + " scanner output")).unwrap();
-            let mut ports: Vec<String> = output
-                .ports()
-                .iter()
-                .map(|item| output.port_name(item).unwrap())
-                .collect();
-            loop {
-                let new_ports: Vec<String> = output
-                    .ports()
-                    .iter()
-                    .map(|item| output.port_name(item).unwrap())
-                    .collect();
-                if ports != new_ports {
-                    log::debug!("MIDI output port configuration changed.");
-                    message_sender.send(Message::RescanDevices).ok();
-                    ports = new_ports;
-                }
-                std::thread::sleep(std::time::Duration::from_millis(scan_interval));
-            }
-        });
-    }
-
-    /// Scans the ports
-    pub fn scan_ports(&mut self) {
+    /// Scan the ports and return if anything has changed since the last scan
+    pub fn scan_ports(&mut self) -> bool {
         if self.scan_output.is_none() {
             match MidiOutput::new(&(env!("CARGO_PKG_NAME").to_owned() + " scan output")) {
                 Ok(output) => {
@@ -82,6 +47,8 @@ impl MidiConnector {
             }
         }
 
+        let mut ports_changed = false;
+
         if self.scan_output.is_some() {
             let output = self.scan_output.as_ref().unwrap();
             let mut outputs_list = Vec::new();
@@ -89,8 +56,11 @@ impl MidiConnector {
                 let port_name = output.port_name(port).unwrap();
                 outputs_list.push(port_name);
             }
+            ports_changed = self.outputs_list.len() != outputs_list.len();
             self.outputs_list = outputs_list;
         }
+
+        ports_changed
     }
 
     /// Sends a message

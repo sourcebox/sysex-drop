@@ -208,10 +208,12 @@ impl epi::App for App {
             log::debug!("Loading persistent data.");
             *self = epi::get_value(storage, epi::APP_KEY).unwrap_or_default()
         }
-        self.midi
-            .lock()
-            .unwrap()
-            .init_port_scanner(500, self.message_channel.0.clone());
+
+        let message_sender = self.message_channel.0.clone();
+        std::thread::spawn(move || loop {
+            message_sender.send(Message::RescanDevices).ok();
+            std::thread::sleep(std::time::Duration::from_millis(250));
+        });
     }
 
     /// Called each time the UI needs repainting, which may be many times per second.
@@ -417,12 +419,14 @@ impl App {
         match message {
             Message::RescanDevices => {
                 let mut midi = self.midi.lock().unwrap();
-                midi.scan_ports();
-                if let Some(device) = &self.selected_device {
-                    self.message_channel
-                        .0
-                        .send(Message::SelectDevice(device.to_owned()))
-                        .ok();
+                let ports_changed = midi.scan_ports();
+                if ports_changed {
+                    if let Some(device) = &self.selected_device {
+                        self.message_channel
+                            .0
+                            .send(Message::SelectDevice(device.to_owned()))
+                            .ok();
+                    }
                 }
             }
             Message::SelectDevice(name) => {
