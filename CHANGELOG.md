@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Updated `eframe` dependency to `0.16`
-- Updated `simple_logger` dependency to `1.16`. Now using UTC timestamps.
+- Updated `simple_logger` dependency to `2.1`. Now using UTC timestamps.
 
 ## [1.0.0] - 2021-10-31
 
