@@ -4,7 +4,7 @@ version = "1.2.0-pre"
 authors = ["Oliver Rockstedt <info@sourcebox.de>"]
 license = "MIT"
 edition = "2021"
-rust-version = "1.56"
+rust-version = "1.59"
 description = "Drag-and-drop MIDI SysEx dump utility"
 homepage = "https://github.com/sourcebox/sysex-drop"
 repository = "https://github.com/sourcebox/sysex-drop"
@@ -19,6 +19,7 @@ simple_logger = "2.1"
 
 [profile.release]
 lto = true
+strip = true
 
 [package.metadata.bundle]
 icon = [

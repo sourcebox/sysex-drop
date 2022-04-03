@@ -9,7 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Auto-Start feature
+- Auto-Start feature.
+- Strip symbols from release builds to reduce binary size.
 
 ### Changed
 
