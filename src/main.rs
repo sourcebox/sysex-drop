@@ -123,6 +123,9 @@ impl FileType {
 /// Event messages for application actions
 #[derive(Debug, Clone)]
 pub enum Message {
+    /// Initialization on startup
+    Init,
+
     /// Force rescanning of devices
     RescanDevices,
 
@@ -200,7 +203,7 @@ impl epi::App for App {
     fn setup(
         &mut self,
         _ctx: &egui::CtxRef,
-        frame: &epi::Frame,
+        _frame: &epi::Frame,
         storage: Option<&dyn epi::Storage>,
     ) {
         if let Some(storage) = storage {
@@ -208,22 +211,22 @@ impl epi::App for App {
             *self = epi::get_value(storage, epi::APP_KEY).unwrap_or_default()
         }
 
+        self.message_channel.0.send(Message::Init).ok();
+
         let message_sender = self.message_channel.0.clone();
         std::thread::spawn(move || loop {
             message_sender.send(Message::RescanDevices).ok();
             std::thread::sleep(std::time::Duration::from_millis(250));
         });
-
-        frame.set_window_size(WINDOW_SIZE);
     }
 
     /// Called each time the UI needs repainting, which may be many times per second.
-    fn update(&mut self, ctx: &egui::CtxRef, _frame: &epi::Frame) {
+    fn update(&mut self, ctx: &egui::CtxRef, frame: &epi::Frame) {
         // Continuous run mode is required for message processing
         ctx.request_repaint();
 
         while let Ok(message) = self.message_channel.1.try_recv() {
-            self.process_message(&message);
+            self.process_message(&message, frame);
         }
 
         egui::CentralPanel::default().show(ctx, |ui| {
@@ -417,8 +420,11 @@ impl epi::App for App {
 
 impl App {
     /// Process an event message
-    fn process_message(&mut self, message: &Message) {
+    fn process_message(&mut self, message: &Message, frame: &epi::Frame) {
         match message {
+            Message::Init => {
+                frame.set_window_size(WINDOW_SIZE);
+            }
             Message::RescanDevices => {
                 let mut midi = self.midi.lock().unwrap();
                 let ports_changed = midi.scan_ports();
