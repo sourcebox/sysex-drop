@@ -304,7 +304,7 @@ impl epi::App for App {
                     ui.label("ms");
                     ui.with_layout(egui::Layout::right_to_left(), |ui| {
                         ui.checkbox(&mut self.auto_start, "Auto-Start")
-                            .on_hover_text("Start immediately after dropping file");
+                            .on_hover_text("Start immediately after dropping a file");
                     });
                 });
             });
