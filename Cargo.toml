@@ -10,12 +10,17 @@ homepage = "https://github.com/sourcebox/sysex-drop"
 repository = "https://github.com/sourcebox/sysex-drop"
 
 [dependencies]
-eframe = {version = "0.16", features = ["persistence"]}
+#eframe = {version = "0.16", features = ["persistence"]}
 log = {version = "0.4", features = ["max_level_debug", "release_max_level_info"]}
 midir = "0.7"
 midly = "0.5"
 serde = {version = "1", features = ["derive"]}
 simple_logger = "2.1"
+
+[dependencies.eframe]
+git = "https://github.com/emilk/egui"
+revision = "95efbbc03e40602abdb4a94bc178ef1c6cb3e6a2"
+features = ["persistence"]
 
 [profile.release]
 lto = true

@@ -23,14 +23,17 @@ fn main() {
         .init()
         .unwrap();
 
-    let app = App::default();
     let native_options = eframe::NativeOptions {
         initial_window_size: Some(WINDOW_SIZE),
         resizable: false,
         drag_and_drop_support: true,
         ..eframe::NativeOptions::default()
     };
-    eframe::run_native(Box::new(app), native_options);
+    eframe::run_native(
+        "SysEx Drop",
+        native_options,
+        Box::new(|cc| Box::new(App::new(cc))),
+    );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -189,39 +192,14 @@ impl Default for App {
 }
 
 impl epi::App for App {
-    fn name(&self) -> &str {
-        "SysEx Drop"
-    }
-
     /// Called by the frame work to save state before shutdown
     fn save(&mut self, storage: &mut dyn epi::Storage) {
         log::debug!("Saving persistent data.");
         epi::set_value(storage, epi::APP_KEY, self);
     }
 
-    /// Called once on startup
-    fn setup(
-        &mut self,
-        _ctx: &egui::CtxRef,
-        _frame: &epi::Frame,
-        storage: Option<&dyn epi::Storage>,
-    ) {
-        if let Some(storage) = storage {
-            log::debug!("Loading persistent data.");
-            *self = epi::get_value(storage, epi::APP_KEY).unwrap_or_default()
-        }
-
-        self.message_channel.0.send(Message::Init).ok();
-
-        let message_sender = self.message_channel.0.clone();
-        std::thread::spawn(move || loop {
-            message_sender.send(Message::RescanDevices).ok();
-            std::thread::sleep(std::time::Duration::from_millis(250));
-        });
-    }
-
     /// Called each time the UI needs repainting, which may be many times per second.
-    fn update(&mut self, ctx: &egui::CtxRef, frame: &epi::Frame) {
+    fn update(&mut self, ctx: &egui::Context, frame: &mut epi::Frame) {
         // Continuous run mode is required for message processing
         ctx.request_repaint();
 
@@ -419,8 +397,29 @@ impl epi::App for App {
 }
 
 impl App {
+    /// Create the application
+    pub fn new(cc: &epi::CreationContext<'_>) -> Self {
+        let app = if let Some(storage) = cc.storage {
+            epi::get_value(storage, epi::APP_KEY).unwrap_or_default()
+        } else {
+            Self::default()
+        };
+
+        cc.egui_ctx.set_visuals(egui::Visuals::dark());
+
+        app.message_channel.0.send(Message::Init).ok();
+
+        let message_sender = app.message_channel.0.clone();
+        std::thread::spawn(move || loop {
+            message_sender.send(Message::RescanDevices).ok();
+            std::thread::sleep(std::time::Duration::from_millis(250));
+        });
+
+        app
+    }
+
     /// Process an event message
-    fn process_message(&mut self, message: &Message, frame: &epi::Frame) {
+    fn process_message(&mut self, message: &Message, frame: &mut epi::Frame) {
         match message {
             Message::Init => {
                 frame.set_window_size(WINDOW_SIZE);
@@ -501,7 +500,7 @@ impl App {
 
         let file_type = FileType::from_path(path)?;
 
-        let mut file = std::fs::File::open(path.to_path_buf())?;
+        let mut file = std::fs::File::open(path)?;
         let file_size = file.seek(std::io::SeekFrom::End(0))?;
         file.seek(std::io::SeekFrom::Start(0))?;
 
