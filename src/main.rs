@@ -61,6 +61,9 @@ pub struct App {
     /// Interval in ms between packets
     packet_interval: u64,
 
+    /// Auto-start enabled flag
+    auto_start: bool,
+
     /// Transfer state
     #[serde(skip)]
     transfer_state: TransferState,
@@ -171,6 +174,7 @@ impl Default for App {
             file_packet_count: 0,
             selected_device: None,
             packet_interval: 20,
+            auto_start: false,
             transfer_state: TransferState::Idle,
             transfer_progress: 0.0,
             midi: Arc::new(Mutex::new(midi::MidiConnector::new())),
@@ -287,7 +291,15 @@ impl epi::App for App {
                                 self.transfer_progress = 0.0;
                                 self.transfer_state = TransferState::Idle;
                                 match self.process_file(path) {
-                                    Ok(()) => self.error_message = None,
+                                    Ok(()) => {
+                                        self.error_message = None;
+                                        if self.auto_start {
+                                            self.message_channel
+                                                .0
+                                                .send(Message::StartTransfer)
+                                                .ok();
+                                        }
+                                    }
                                     Err(error) => {
                                         self.error_message = Some(error.to_string());
                                     }
@@ -309,6 +321,10 @@ impl epi::App for App {
                     )
                     .on_hover_text("Hold SHIFT while dragging\n for fine-adjustments");
                     ui.label("ms");
+                    ui.with_layout(egui::Layout::right_to_left(), |ui| {
+                        ui.checkbox(&mut self.auto_start, "Auto-Start")
+                            .on_hover_text("Start immediately after dropping file");
+                    });
                 });
             });
 
