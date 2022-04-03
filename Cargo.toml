@@ -19,7 +19,7 @@ simple_logger = "2.1"
 
 [dependencies.eframe]
 git = "https://github.com/emilk/egui"
-revision = "95efbbc03e40602abdb4a94bc178ef1c6cb3e6a2"
+rev = "95efbbc03e40602abdb4a94bc178ef1c6cb3e6a2"
 features = ["persistence"]
 
 [profile.release]
