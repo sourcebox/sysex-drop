@@ -25,6 +25,8 @@ fn main() {
 
     let native_options = eframe::NativeOptions {
         initial_window_size: Some(WINDOW_SIZE),
+        min_window_size: Some(WINDOW_SIZE),
+        max_window_size: Some(WINDOW_SIZE),
         resizable: false,
         drag_and_drop_support: true,
         ..eframe::NativeOptions::default()
