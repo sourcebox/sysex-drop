@@ -14,6 +14,9 @@ type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 /// Size of the native application window
 const WINDOW_SIZE: egui::Vec2 = egui::vec2(400.0, 300.0);
 
+/// Max number of frames per second
+const FPS_LIMIT: u32 = 25;
+
 ////////////////////////////////////////////////////////////////////////////////
 
 /// Starts the application
@@ -95,6 +98,14 @@ pub struct App {
     /// MPSC sender to cancel the transmit thread
     #[serde(skip)]
     transmit_thread_sender: Option<std::sync::mpsc::Sender<bool>>,
+
+    /// Time interval between frames
+    #[serde(skip)]
+    frame_interval: std::time::Duration,
+
+    /// Timestamp of next frame
+    #[serde(skip)]
+    next_frame: std::time::Instant,
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -189,6 +200,8 @@ impl Default for App {
             error_message: None,
             message_channel: std::sync::mpsc::channel(),
             transmit_thread_sender: None,
+            frame_interval: std::time::Duration::from_secs_f64(1.0 / FPS_LIMIT as f64),
+            next_frame: std::time::Instant::now(),
         }
     }
 }
@@ -202,6 +215,10 @@ impl epi::App for App {
 
     /// Called each time the UI needs repainting, which may be many times per second.
     fn update(&mut self, ctx: &egui::Context, frame: &mut epi::Frame) {
+        // Limit frame rate
+        std::thread::sleep(self.next_frame - std::time::Instant::now());
+        self.next_frame += self.frame_interval;
+
         // Continuous run mode is required for message processing
         ctx.request_repaint();
 

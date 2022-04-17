@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Auto-Start feature.
+- Frame rate limit to reduce CPU load.
 - Strip symbols from release builds to reduce binary size.
 
 ### Changed
