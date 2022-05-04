@@ -3,7 +3,7 @@
 
 mod midi;
 
-use eframe::{egui, epi};
+use eframe::egui;
 use simple_logger::SimpleLogger;
 use std::io::{BufRead, BufReader, Seek};
 use std::sync::{Arc, Mutex};
@@ -206,15 +206,15 @@ impl Default for App {
     }
 }
 
-impl epi::App for App {
+impl eframe::App for App {
     /// Called by the frame work to save state before shutdown
-    fn save(&mut self, storage: &mut dyn epi::Storage) {
+    fn save(&mut self, storage: &mut dyn eframe::Storage) {
         log::debug!("Saving persistent data.");
-        epi::set_value(storage, epi::APP_KEY, self);
+        eframe::set_value(storage, eframe::APP_KEY, self);
     }
 
     /// Called each time the UI needs repainting, which may be many times per second.
-    fn update(&mut self, ctx: &egui::Context, frame: &mut epi::Frame) {
+    fn update(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
         // Limit frame rate
         std::thread::sleep(self.next_frame - std::time::Instant::now());
         self.next_frame += self.frame_interval;
@@ -417,9 +417,9 @@ impl epi::App for App {
 
 impl App {
     /// Create the application
-    pub fn new(cc: &epi::CreationContext<'_>) -> Self {
+    pub fn new(cc: &eframe::CreationContext<'_>) -> Self {
         let app = if let Some(storage) = cc.storage {
-            epi::get_value(storage, epi::APP_KEY).unwrap_or_default()
+            eframe::get_value(storage, eframe::APP_KEY).unwrap_or_default()
         } else {
             Self::default()
         };
@@ -438,7 +438,7 @@ impl App {
     }
 
     /// Process an event message
-    fn process_message(&mut self, message: &Message, frame: &mut epi::Frame) {
+    fn process_message(&mut self, message: &Message, frame: &mut eframe::Frame) {
         match message {
             Message::Init => {
                 frame.set_window_size(WINDOW_SIZE);
