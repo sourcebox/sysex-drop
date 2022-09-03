@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Updated `eframe` dependency to `0.19`
 
+### Fixed
+
+- Restore window position correctly on Linux.
+
 ## [1.2.0] - 2022-04-25
 
 ### Added
