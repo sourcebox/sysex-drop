@@ -321,7 +321,7 @@ impl eframe::App for App {
                     )
                     .on_hover_text("Hold SHIFT while dragging\n for fine-adjustments");
                     ui.label("ms");
-                    ui.with_layout(egui::Layout::right_to_left(), |ui| {
+                    ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                         ui.checkbox(&mut self.auto_start, "Auto-Start")
                             .on_hover_text("Start immediately after dropping a file");
                     });
@@ -407,7 +407,7 @@ impl eframe::App for App {
             ui.horizontal(|ui| {
                 ui.label(format!("v{}", &env!("CARGO_PKG_VERSION")));
                 egui::warn_if_debug_build(ui);
-                ui.with_layout(egui::Layout::right_to_left(), |ui| {
+                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                     ui.hyperlink_to("Project homepage", env!("CARGO_PKG_HOMEPAGE"));
                 });
             });
