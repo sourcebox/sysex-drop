@@ -167,7 +167,7 @@ pub enum Message {
 ////////////////////////////////////////////////////////////////////////////////
 
 /// Transfer states
-#[derive(PartialEq)]
+#[derive(PartialEq, Eq)]
 pub enum TransferState {
     /// Initial state
     Idle,
