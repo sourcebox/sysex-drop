@@ -14,7 +14,7 @@ log = {version = "0.4", features = ["max_level_debug", "release_max_level_info"]
 midir = "0.8"
 midly = "0.5"
 serde = {version = "1", features = ["derive"]}
-simple_logger = "2"
+simple_logger = "4"
 
 [dependencies.eframe]
 version = "0.19"
