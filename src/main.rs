@@ -3,13 +3,12 @@
 
 mod midi;
 
-use eframe::egui;
-use simple_logger::SimpleLogger;
 use std::io::{BufRead, BufReader, Seek};
 use std::sync::{Arc, Mutex};
 
-/// Result type with dynamic error variants
-type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
+use anyhow::{anyhow, Result};
+use eframe::egui;
+use simple_logger::SimpleLogger;
 
 /// Size of the native application window
 const WINDOW_SIZE: egui::Vec2 = egui::vec2(400.0, 300.0);
@@ -536,10 +535,10 @@ impl App {
                         break;
                     }
                     if data[0] != midi::SYSEX_START_BYTE {
-                        return Err(Box::new(Error::NoStartByte));
+                        return Err(anyhow!(Error::NoStartByte));
                     }
                     if data[data_length - 1] != midi::SYSEX_END_BYTE {
-                        return Err(Box::new(Error::NoEndByte));
+                        return Err(anyhow!(Error::NoEndByte));
                     }
                     packet_count += 1;
                 }
@@ -558,7 +557,7 @@ impl App {
         }
 
         if packet_count == 0 {
-            return Err(Box::new(Error::NoPackets));
+            return Err(anyhow!(Error::NoPackets));
         }
 
         // File is valid, so set the info fields
