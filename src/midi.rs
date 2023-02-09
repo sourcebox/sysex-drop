@@ -1,5 +1,6 @@
 //! Module containing the MIDI-related code
 
+use anyhow::Result;
 use midir::{MidiOutput, MidiOutputConnection};
 
 /// Sysex message start byte
@@ -76,7 +77,7 @@ impl MidiConnector {
     }
 
     /// Select the output
-    pub fn select_output(&mut self, output_name: String) {
+    pub fn select_output(&mut self, output_name: String) -> Result<()> {
         if self.output.is_some() {
             self.output = None;
             self.output_name = String::new();
@@ -103,13 +104,14 @@ impl MidiConnector {
                     self.scan_output
                         .take()
                         .unwrap()
-                        .connect(port, "SysEx Drop Output")
-                        .unwrap(),
+                        .connect(port, "SysEx Drop Output")?,
                 );
                 self.output_name = port_name;
                 break;
             }
         }
+
+        Ok(())
     }
 
     /// Return the name of the selected output

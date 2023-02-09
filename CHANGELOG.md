@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Show error message instead of panic when MIDI port is unavailable.
 - Restore window position correctly on Linux.
 - Save persistent settings on macOS when Cmd-Q is pressed.
 

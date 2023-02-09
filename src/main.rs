@@ -458,7 +458,11 @@ impl App {
             }
             Message::SelectDevice(name) => {
                 log::debug!("Device {} selected.", name);
-                self.midi.lock().unwrap().select_output(name.to_string());
+                match self.midi.lock().unwrap().select_output(name.to_string()) {
+                    Ok(()) => self.error_message = None,
+                    Err(err) => self.error_message = Some(err.to_string()),
+                }
+
                 self.selected_device = Some(name.to_owned())
             }
             Message::StartTransfer => {
