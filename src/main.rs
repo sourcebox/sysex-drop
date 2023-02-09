@@ -522,7 +522,7 @@ impl App {
 
         let mut file = std::fs::File::open(path)?;
         let file_size = file.seek(std::io::SeekFrom::End(0))?;
-        file.seek(std::io::SeekFrom::Start(0))?;
+        file.rewind()?;
 
         let mut packet_count = 0;
 
