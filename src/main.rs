@@ -37,7 +37,8 @@ fn main() {
         "SysEx Drop",
         native_options,
         Box::new(|cc| Box::new(App::new(cc))),
-    );
+    )
+    .ok();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -245,7 +246,7 @@ impl eframe::App for App {
                     ui.set_height(60.0);
 
                     ui.centered_and_justified(|ui| {
-                        if !ctx.input().raw.hovered_files.is_empty()
+                        if !ctx.input(|i| i.raw.hovered_files.is_empty())
                             && self.transfer_state != TransferState::Running
                         {
                             // Files hovered
@@ -282,10 +283,11 @@ impl eframe::App for App {
                     });
 
                     // Files dropped
-                    if !ctx.input().raw.dropped_files.is_empty()
+                    if !ctx.input(|i| i.raw.dropped_files.is_empty())
                         && self.transfer_state != TransferState::Running
                     {
-                        for file in &ctx.input().raw.dropped_files {
+                        let dropped_files = ctx.input(|i| i.raw.dropped_files.clone());
+                        for file in &dropped_files {
                             if let Some(path) = &file.path {
                                 self.transfer_progress = 0.0;
                                 self.transfer_state = TransferState::Idle;
