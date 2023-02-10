@@ -1,6 +1,6 @@
 //! Module containing the MIDI-related code
 
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use midir::{MidiOutput, MidiOutputConnection};
 
 /// Sysex message start byte
@@ -100,13 +100,17 @@ impl MidiConnector {
             let port_name = output.port_name(port).unwrap();
             if port_name == output_name {
                 log::info!("MIDI output connected to port {}", port_name);
-                self.output = Some(
-                    self.scan_output
-                        .take()
-                        .unwrap()
-                        .connect(port, "SysEx Drop Output")?,
-                );
-                self.output_name = port_name;
+                let scan_output = self
+                    .scan_output
+                    .take()
+                    .unwrap()
+                    .connect(port, "SysEx Drop Output");
+                if let Ok(scan_output) = scan_output {
+                    self.output = Some(scan_output);
+                    self.output_name = port_name;
+                } else {
+                    return Err(anyhow!("MIDI connection error."));
+                }
                 break;
             }
         }
