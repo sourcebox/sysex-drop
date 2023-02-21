@@ -1,5 +1,6 @@
 #![doc = include_str!("../README.md")]
 #![windows_subsystem = "windows"]
+#![warn(missing_docs)]
 
 mod midi;
 
@@ -112,10 +113,10 @@ pub struct App {
 
 /// File type
 pub enum FileType {
-    // Raw SysEx file
+    /// Raw SysEx file
     SysEx,
 
-    // Standard MIDI file
+    /// Standard MIDI file
     SMF,
 }
 
