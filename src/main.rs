@@ -318,7 +318,7 @@ impl eframe::App for App {
                     ui.label("Delay between packets:");
                     ui.add(
                         egui::DragValue::new(&mut self.packet_interval)
-                            .clamp_range(std::ops::RangeInclusive::new(1, 500))
+                            .clamp_range(std::ops::RangeInclusive::new(1, 5000))
                             .speed(1.0),
                     )
                     .on_hover_text("Hold SHIFT while dragging\n for fine-adjustments");
