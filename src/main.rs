@@ -3,6 +3,7 @@
 #![warn(missing_docs)]
 
 mod midi;
+mod theme;
 
 use std::io::{BufRead, BufReader, Seek};
 use std::sync::{Arc, Mutex};
@@ -12,7 +13,7 @@ use eframe::egui;
 use simple_logger::SimpleLogger;
 
 /// Size of the native application window
-const WINDOW_SIZE: egui::Vec2 = egui::vec2(400.0, 300.0);
+const WINDOW_SIZE: egui::Vec2 = egui::vec2(450.0, 340.0);
 
 /// Max number of frames per second
 const FPS_LIMIT: u32 = 25;
@@ -37,7 +38,10 @@ fn main() {
     eframe::run_native(
         "SysEx Drop",
         native_options,
-        Box::new(|cc| Box::new(App::new(cc))),
+        Box::new(|cc| {
+            cc.egui_ctx.set_style(theme::style());
+            Box::new(App::new(cc))
+        }),
     )
     .ok();
 }
@@ -244,7 +248,7 @@ impl eframe::App for App {
 
                 ui.group(|ui| {
                     ui.set_width(ui.available_width());
-                    ui.set_height(60.0);
+                    ui.set_height(70.0);
 
                     ui.centered_and_justified(|ui| {
                         if !ctx.input(|i| i.raw.hovered_files.is_empty())
@@ -315,7 +319,10 @@ impl eframe::App for App {
                 ui.add_space(20.0);
 
                 ui.horizontal(|ui| {
-                    ui.label("Delay between packets:");
+                    ui.vertical(|ui| {
+                        ui.add_space(5.0);
+                        ui.label("Delay between packets:");
+                    });
                     ui.add(
                         egui::DragValue::new(&mut self.packet_interval)
                             .clamp_range(std::ops::RangeInclusive::new(1, 5000))
@@ -336,12 +343,15 @@ impl eframe::App for App {
                 ui.set_enabled(self.file_path.is_some() && self.error_message.is_none());
 
                 ui.horizontal(|ui| {
-                    ui.add(
-                        egui::ProgressBar::new(self.transfer_progress)
-                            .show_percentage()
-                            .desired_width(ui.available_width() - 100.0)
-                            .animate(self.transfer_state == TransferState::Running),
-                    );
+                    ui.vertical(|ui| {
+                        ui.add_space(4.0);
+                        ui.add(
+                            egui::ProgressBar::new(self.transfer_progress)
+                                .show_percentage()
+                                .desired_width(ui.available_width() - 100.0)
+                                .animate(self.transfer_state == TransferState::Running),
+                        );
+                    });
                     ui.centered_and_justified(|ui| {
                         if self.transfer_state != TransferState::Running {
                             if ui
@@ -366,7 +376,7 @@ impl eframe::App for App {
                 });
             });
 
-            ui.add_space(20.0);
+            ui.add_space(12.0);
 
             ui.vertical_centered(|ui| {
                 if let Some(error_message) = &self.error_message {
@@ -406,6 +416,8 @@ impl eframe::App for App {
 
         // Bottom panel with app version
         egui::TopBottomPanel::bottom("bottom_panel").show(ctx, |ui| {
+            ui.set_height(25.0);
+            ui.add_space(4.0);
             ui.horizontal(|ui| {
                 ui.label(format!("v{}", &env!("CARGO_PKG_VERSION")));
                 egui::warn_if_debug_build(ui);
@@ -601,7 +613,7 @@ pub fn device_selection(
 
     ui.horizontal(|ui| {
         ui.vertical(|ui| {
-            ui.add_space(2.0);
+            ui.add_space(5.0);
             ui.label("Device:");
         });
 
