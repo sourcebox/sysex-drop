@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Always on top feature for application window on macOS and Windows.
+
 ### Changed
 
 - Custom styling.

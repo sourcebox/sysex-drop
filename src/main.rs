@@ -77,6 +77,9 @@ pub struct App {
     /// Auto-start enabled flag
     auto_start: bool,
 
+    /// Always on top flag
+    always_on_top: bool,
+
     /// Transfer state
     #[serde(skip)]
     transfer_state: TransferState,
@@ -199,6 +202,7 @@ impl Default for App {
             selected_device: None,
             packet_interval: 20,
             auto_start: false,
+            always_on_top: false,
             transfer_state: TransferState::Idle,
             transfer_progress: 0.0,
             midi: Arc::new(Mutex::new(midi::MidiConnector::new())),
@@ -223,6 +227,10 @@ impl eframe::App for App {
         // Limit frame rate
         std::thread::sleep(self.next_frame - std::time::Instant::now());
         self.next_frame += self.frame_interval;
+
+        // Set always on top state.
+        #[cfg(not(target_os = "linux"))]
+        frame.set_always_on_top(self.always_on_top);
 
         // Continuous run mode is required for message processing
         ctx.request_repaint();
@@ -316,25 +324,39 @@ impl eframe::App for App {
                     }
                 });
 
-                ui.add_space(20.0);
+                ui.add_space(10.0);
 
-                ui.horizontal(|ui| {
-                    ui.vertical(|ui| {
-                        ui.add_space(5.0);
+                egui::Grid::new("settings").num_columns(2).show(ui, |ui| {
+                    ui.set_height(40.0);
+                    ui.with_layout(egui::Layout::left_to_right(egui::Align::Center), |ui| {
+                        ui.set_height(ui.available_height());
                         ui.label("Delay between packets:");
+                        ui.add_sized(
+                            [70.0, 20.0],
+                            egui::DragValue::new(&mut self.packet_interval)
+                                .clamp_range(std::ops::RangeInclusive::new(1, 5000))
+                                .speed(1.0),
+                        )
+                        .on_hover_text("Hold SHIFT while dragging\n for fine-adjustments");
+                        ui.label("ms");
                     });
-                    ui.add_sized(
-                        [70.0, 20.0],
-                        egui::DragValue::new(&mut self.packet_interval)
-                            .clamp_range(std::ops::RangeInclusive::new(1, 5000))
-                            .speed(1.0),
-                    )
-                    .on_hover_text("Hold SHIFT while dragging\n for fine-adjustments");
-                    ui.label("ms");
-                    ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                    ui.add_space(65.0);
+                    ui.with_layout(egui::Layout::top_down(egui::Align::Min), |ui| {
+                        ui.set_height(ui.available_height());
                         ui.checkbox(&mut self.auto_start, "Auto-Start")
                             .on_hover_text("Start immediately after dropping a file");
+
+                        // Currently not working on Linux.
+                        #[cfg(target_os = "linux")]
+                        ui.set_enabled(false);
+
+                        ui.checkbox(&mut self.always_on_top, "Always on top")
+                            .on_hover_text("Keep application window on top of others")
+                            .on_disabled_hover_text(
+                                "This option is not available on this platform",
+                            );
                     });
+                    ui.end_row();
                 });
             });
 
