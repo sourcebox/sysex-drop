@@ -323,7 +323,8 @@ impl eframe::App for App {
                         ui.add_space(5.0);
                         ui.label("Delay between packets:");
                     });
-                    ui.add(
+                    ui.add_sized(
+                        [70.0, 20.0],
                         egui::DragValue::new(&mut self.packet_interval)
                             .clamp_range(std::ops::RangeInclusive::new(1, 5000))
                             .speed(1.0),
