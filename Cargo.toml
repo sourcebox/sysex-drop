@@ -10,18 +10,18 @@ homepage = "https://github.com/sourcebox/sysex-drop"
 repository = "https://github.com/sourcebox/sysex-drop"
 
 [dependencies]
-anyhow = "1.0"
-log = { version = "0.4", features = [
+anyhow = "1.0.75"
+log = { version = "0.4.20", features = [
   "max_level_debug",
   "release_max_level_info",
 ] }
-midir = "0.9"
-midly = "0.5"
-serde = { version = "1", features = ["derive"] }
-simple_logger = "4"
+midir = "0.9.1"
+midly = "0.5.3"
+serde = { version = "1.0.190", features = ["derive"] }
+simple_logger = "4.2.0"
 
 [dependencies.eframe]
-version = "0.23"
+version = "0.23.0"
 features = ["persistence"]
 
 [profile.release]
