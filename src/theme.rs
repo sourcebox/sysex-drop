@@ -56,7 +56,7 @@ pub fn style() -> Style {
             tooltip_width: 600.0,
             indent_ends_with_horizontal_line: false,
             combo_height: 200.0,
-            scroll_bar_width: 3.799999952316284,
+            scroll_bar_width: 3.8,
             scroll_handle_min_length: 12.0,
             scroll_bar_inner_margin: 4.0,
             scroll_bar_outer_margin: 0.0,
@@ -221,7 +221,7 @@ pub fn style() -> Style {
             striped: false,
             slider_trailing_fill: false,
         },
-        animation_time: 0.0833333358168602,
+        animation_time: 0.083,
         explanation_tooltips: false,
         ..Default::default()
     }
