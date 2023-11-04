@@ -114,6 +114,10 @@ pub struct App {
     /// Timestamp of next frame
     #[serde(skip)]
     next_frame: std::time::Instant,
+
+    /// Total number of rendered frames
+    #[serde(skip)]
+    frame_count: u32,
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -211,6 +215,7 @@ impl Default for App {
             transmit_thread_sender: None,
             frame_interval: std::time::Duration::from_secs_f64(1.0 / FPS_LIMIT as f64),
             next_frame: std::time::Instant::now(),
+            frame_count: 0,
         }
     }
 }
@@ -228,9 +233,11 @@ impl eframe::App for App {
         std::thread::sleep(self.next_frame - std::time::Instant::now());
         self.next_frame += self.frame_interval;
 
-        // Set always on top state.
-        #[cfg(not(target_os = "linux"))]
-        frame.set_always_on_top(self.always_on_top);
+        // Set initial always on top state once on startup, because of
+        // a bug in the Linux implementation.
+        if self.frame_count == 1 {
+            frame.set_always_on_top(self.always_on_top);
+        }
 
         // Continuous run mode is required for message processing
         ctx.request_repaint();
@@ -345,16 +352,13 @@ impl eframe::App for App {
                         ui.set_height(ui.available_height());
                         ui.checkbox(&mut self.auto_start, "Auto-Start")
                             .on_hover_text("Start immediately after dropping a file");
-
-                        // Currently not working on Linux.
-                        #[cfg(target_os = "linux")]
-                        ui.set_enabled(false);
-
-                        ui.checkbox(&mut self.always_on_top, "Always on top")
-                            .on_hover_text("Keep application window on top of others")
-                            .on_disabled_hover_text(
-                                "This option is not available on this platform",
-                            );
+                        let mut always_on_top = self.always_on_top;
+                        ui.checkbox(&mut always_on_top, "Always on top")
+                            .on_hover_text("Keep application window on top of others");
+                        if always_on_top != self.always_on_top {
+                            frame.set_always_on_top(always_on_top);
+                            self.always_on_top = always_on_top;
+                        }
                     });
                     ui.end_row();
                 });
@@ -449,6 +453,8 @@ impl eframe::App for App {
                 });
             });
         });
+
+        self.frame_count += 1;
     }
 }
 

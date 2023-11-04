@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Always on top feature for application window on macOS and Windows.
+- Always on top feature for application window.
 
 ### Changed
 
