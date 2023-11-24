@@ -4,7 +4,9 @@
 
 use eframe::egui::{
     epaint::Shadow,
-    style::{Interaction, Margin, Selection, Spacing, WidgetVisuals, Widgets},
+    style::{
+        HandleShape, Interaction, Margin, ScrollStyle, Selection, Spacing, WidgetVisuals, Widgets,
+    },
     Color32, FontFamily, FontId, Rounding, Stroke, Style, TextStyle, Vec2, Visuals,
 };
 
@@ -56,10 +58,7 @@ pub fn style() -> Style {
             tooltip_width: 600.0,
             indent_ends_with_horizontal_line: false,
             combo_height: 200.0,
-            scroll_bar_width: 3.8,
-            scroll_handle_min_length: 12.0,
-            scroll_bar_inner_margin: 4.0,
-            scroll_bar_outer_margin: 0.0,
+            scroll: ScrollStyle::floating(),
         },
         interaction: Interaction {
             resize_grab_radius_side: 5.0,
@@ -220,6 +219,7 @@ pub fn style() -> Style {
             indent_has_left_vline: true,
             striped: false,
             slider_trailing_fill: false,
+            handle_shape: HandleShape::Circle,
         },
         animation_time: 0.083,
         explanation_tooltips: false,

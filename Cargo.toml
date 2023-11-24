@@ -4,7 +4,7 @@ version = "1.3.0"
 authors = ["Oliver Rockstedt <info@sourcebox.de>"]
 license = "MIT"
 edition = "2021"
-rust-version = "1.70"
+rust-version = "1.72"
 description = "Drag-and-drop MIDI SysEx dump utility"
 homepage = "https://github.com/sourcebox/sysex-drop"
 repository = "https://github.com/sourcebox/sysex-drop"
@@ -21,7 +21,7 @@ serde = { version = "1.0.190", features = ["derive"] }
 simple_logger = "4.2.0"
 
 [dependencies.eframe]
-version = "0.23.0"
+version = "0.24.0"
 features = ["persistence"]
 
 [profile.release]

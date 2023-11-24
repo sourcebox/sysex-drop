@@ -7,6 +7,7 @@ mod theme;
 
 use std::io::{BufRead, BufReader, Seek};
 use std::sync::{Arc, Mutex};
+use std::time::Duration;
 
 use anyhow::{anyhow, Result};
 use eframe::egui;
@@ -28,11 +29,11 @@ fn main() {
         .unwrap();
 
     let native_options = eframe::NativeOptions {
-        initial_window_size: Some(WINDOW_SIZE),
-        min_window_size: Some(WINDOW_SIZE),
-        max_window_size: Some(WINDOW_SIZE),
-        resizable: false,
-        drag_and_drop_support: true,
+        viewport: egui::ViewportBuilder::default()
+            .with_inner_size(WINDOW_SIZE)
+            .with_min_inner_size(WINDOW_SIZE)
+            .with_resizable(false)
+            .with_drag_and_drop(true),
         ..eframe::NativeOptions::default()
     };
     eframe::run_native(
@@ -111,13 +112,12 @@ pub struct App {
     #[serde(skip)]
     frame_interval: std::time::Duration,
 
-    /// Timestamp of next frame
-    #[serde(skip)]
-    next_frame: std::time::Instant,
-
     /// Total number of rendered frames
     #[serde(skip)]
     frame_count: u32,
+
+    /// Zoom factor.
+    zoom_factor: f32,
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -214,8 +214,8 @@ impl Default for App {
             message_channel: std::sync::mpsc::channel(),
             transmit_thread_sender: None,
             frame_interval: std::time::Duration::from_secs_f64(1.0 / FPS_LIMIT as f64),
-            next_frame: std::time::Instant::now(),
             frame_count: 0,
+            zoom_factor: 1.0,
         }
     }
 }
@@ -228,22 +228,30 @@ impl eframe::App for App {
     }
 
     /// Called each time the UI needs repainting, which may be many times per second.
-    fn update(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
-        // Limit frame rate
-        std::thread::sleep(self.next_frame - std::time::Instant::now());
-        self.next_frame += self.frame_interval;
-
-        // Set initial always on top state once on startup, because of
-        // a bug in the Linux implementation.
+    fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        // Set initial always-on-top state and zoom factor once on startup.
         if self.frame_count == 1 {
-            frame.set_always_on_top(self.always_on_top);
+            ctx.send_viewport_cmd(egui::ViewportCommand::WindowLevel(if self.always_on_top {
+                egui::WindowLevel::AlwaysOnTop
+            } else {
+                egui::WindowLevel::Normal
+            }));
+            ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(
+                WINDOW_SIZE * self.zoom_factor,
+            ));
+        }
+
+        let zoom_factor = ctx.zoom_factor();
+        if self.zoom_factor != zoom_factor {
+            ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(WINDOW_SIZE * zoom_factor));
+            self.zoom_factor = zoom_factor;
         }
 
         // Continuous run mode is required for message processing
-        ctx.request_repaint();
+        ctx.request_repaint_after(Duration::from_millis(1000 / FPS_LIMIT as u64));
 
         while let Ok(message) = self.message_channel.1.try_recv() {
-            self.process_message(&message, frame);
+            self.process_message(&message, ctx);
         }
 
         egui::CentralPanel::default().show(ctx, |ui| {
@@ -356,7 +364,13 @@ impl eframe::App for App {
                         ui.checkbox(&mut always_on_top, "Always on top")
                             .on_hover_text("Keep application window on top of others");
                         if always_on_top != self.always_on_top {
-                            frame.set_always_on_top(always_on_top);
+                            ctx.send_viewport_cmd(egui::ViewportCommand::WindowLevel(
+                                if always_on_top {
+                                    egui::WindowLevel::AlwaysOnTop
+                                } else {
+                                    egui::WindowLevel::Normal
+                                },
+                            ));
                             self.always_on_top = always_on_top;
                         }
                     });
@@ -481,10 +495,10 @@ impl App {
     }
 
     /// Process an event message
-    fn process_message(&mut self, message: &Message, frame: &mut eframe::Frame) {
+    fn process_message(&mut self, message: &Message, ctx: &egui::Context) {
         match message {
             Message::Init => {
-                frame.set_window_size(WINDOW_SIZE);
+                ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(WINDOW_SIZE));
             }
             Message::RescanDevices => {
                 let mut midi = self.midi.lock().unwrap();
