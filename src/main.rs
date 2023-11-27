@@ -355,24 +355,27 @@ impl eframe::App for App {
                         .on_hover_text("Hold SHIFT while dragging\n for fine-adjustments");
                         ui.label("ms");
                     });
-                    ui.add_space(65.0);
-                    ui.with_layout(egui::Layout::top_down(egui::Align::Min), |ui| {
-                        ui.set_height(ui.available_height());
-                        ui.checkbox(&mut self.auto_start, "Auto-Start")
-                            .on_hover_text("Start immediately after dropping a file");
-                        let mut always_on_top = self.always_on_top;
-                        ui.checkbox(&mut always_on_top, "Always on top")
-                            .on_hover_text("Keep application window on top of others");
-                        if always_on_top != self.always_on_top {
-                            ctx.send_viewport_cmd(egui::ViewportCommand::WindowLevel(
-                                if always_on_top {
-                                    egui::WindowLevel::AlwaysOnTop
-                                } else {
-                                    egui::WindowLevel::Normal
-                                },
-                            ));
-                            self.always_on_top = always_on_top;
-                        }
+                    ui.with_layout(egui::Layout::top_down(egui::Align::Max), |ui| {
+                        ui.set_width(110.0);
+                        ui.with_layout(egui::Layout::top_down(egui::Align::Min), |ui| {
+                            ui.set_width(ui.available_width());
+                            ui.set_height(ui.available_height());
+                            ui.checkbox(&mut self.auto_start, "Auto-Start")
+                                .on_hover_text("Start immediately after dropping a file");
+                            let mut always_on_top = self.always_on_top;
+                            ui.checkbox(&mut always_on_top, "Always on top")
+                                .on_hover_text("Keep application window on top of others");
+                            if always_on_top != self.always_on_top {
+                                ctx.send_viewport_cmd(egui::ViewportCommand::WindowLevel(
+                                    if always_on_top {
+                                        egui::WindowLevel::AlwaysOnTop
+                                    } else {
+                                        egui::WindowLevel::Normal
+                                    },
+                                ));
+                                self.always_on_top = always_on_top;
+                            }
+                        });
                     });
                     ui.end_row();
                 });
@@ -664,7 +667,7 @@ pub fn device_selection(
             ui.set_enabled(!device_list.is_empty());
 
             let combo_box = egui::ComboBox::from_id_source("device_list")
-                .width(ui.available_width() - 10.0)
+                .width(ui.available_width())
                 .show_index(ui, &mut device_index, device_list.len(), |i| {
                     if device_count > 0 {
                         device_list[i].clone()
