@@ -17,7 +17,7 @@ log = { version = "0.4.20", features = [
 ] }
 midir = "0.9.1"
 midly = "0.5.3"
-serde = { version = "1.0.190", features = ["derive"] }
+serde = { version = "1.0.193", features = ["derive"] }
 simple_logger = "4.2.0"
 
 [dependencies.eframe]
