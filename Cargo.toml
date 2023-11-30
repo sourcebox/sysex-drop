@@ -21,7 +21,7 @@ serde = { version = "1.0.190", features = ["derive"] }
 simple_logger = "4.2.0"
 
 [dependencies.eframe]
-version = "0.24.0"
+version = "0.24.1"
 features = ["persistence"]
 
 [profile.release]
