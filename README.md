@@ -18,6 +18,9 @@
 - Transfers can be aborted using the *Cancel* button while in progress. This is mainly useful for large transfers that take a longer time and fail on the device side.
 - A status message is shown after the transfer is completed or cancelled.
 - You can enable the *Auto-Start* checkbox to make operation even faster. When enabled, each transfer immediately starts after dropping the file without the need for pressing the *Start* button.
+- The application window can be zoomed via key commands:
+  - macOS: <kbd>Cmd</kbd> + <kbd>+</kbd>,  <kbd>Cmd</kbd> + <kbd>-</kbd> and  <kbd>Cmd</kbd> + <kbd>0</kbd>.
+  - Windows/Linux: <kbd>Ctrl</kbd> + <kbd>+</kbd>,  <kbd>Ctrl</kbd> + <kbd>-</kbd> and  <kbd>Ctrl</kbd> + <kbd>0</kbd>.
 
 ### Adjusting the transfer delay setting
 
