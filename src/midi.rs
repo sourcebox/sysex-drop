@@ -50,8 +50,7 @@ impl MidiConnector {
 
         let mut ports_changed = false;
 
-        if self.scan_output.is_some() {
-            let output = self.scan_output.as_ref().unwrap();
+        if let Some(output) = &self.scan_output {
             let mut outputs_list = Vec::new();
             for port in output.ports().iter() {
                 let port_name = output.port_name(port).unwrap();

@@ -499,7 +499,7 @@ impl eframe::App for App {
             ui.set_height(25.0);
             ui.add_space(4.0);
             ui.horizontal(|ui| {
-                ui.label(format!("v{}", &env!("CARGO_PKG_VERSION")));
+                ui.label(format!("v{}", env!("CARGO_PKG_VERSION")));
                 egui::warn_if_debug_build(ui);
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                     ui.hyperlink_to("Project homepage", env!("CARGO_PKG_HOMEPAGE"));
@@ -544,13 +544,11 @@ impl App {
             Message::RescanDevices => {
                 let mut midi = self.midi.lock().unwrap();
                 let ports_changed = midi.scan_ports();
-                if ports_changed {
-                    if let Some(device) = &self.selected_device {
-                        self.message_channel
-                            .0
-                            .send(Message::SelectDevice(device.to_owned()))
-                            .ok();
-                    }
+                if ports_changed && let Some(device) = &self.selected_device {
+                    self.message_channel
+                        .0
+                        .send(Message::SelectDevice(device.to_owned()))
+                        .ok();
                 }
             }
             Message::SelectDevice(name) => {
