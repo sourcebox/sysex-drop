@@ -1,6 +1,6 @@
 //! Module containing the MIDI-related code
 
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 use midir::{MidiOutput, MidiOutputConnection};
 
 /// Sysex message start byte

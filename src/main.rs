@@ -8,11 +8,11 @@ use std::io::{BufRead, BufReader, Seek};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 use eframe::egui::{
-    self,
+    self, FontFamily, FontId, Margin,
     style::{Spacing, TextStyle},
-    vec2, FontFamily, FontId, Margin,
+    vec2,
 };
 use simple_logger::SimpleLogger;
 
@@ -525,9 +525,11 @@ impl App {
         app.message_channel.0.send(Message::Init).ok();
 
         let message_sender = app.message_channel.0.clone();
-        std::thread::spawn(move || loop {
-            message_sender.send(Message::RescanDevices).ok();
-            std::thread::sleep(std::time::Duration::from_millis(250));
+        std::thread::spawn(move || {
+            loop {
+                message_sender.send(Message::RescanDevices).ok();
+                std::thread::sleep(std::time::Duration::from_millis(250));
+            }
         });
 
         app

@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Updated `eframe` dependency to `0.36.1`
+- Use 2024 edition of Rust.
 
 ## [1.4.0] - 2023-12-03
 
