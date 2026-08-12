@@ -290,6 +290,19 @@ impl eframe::App for App {
             self.zoom_factor = zoom_factor;
         }
 
+        // Bottom panel with app version
+        egui::Panel::bottom("bottom_panel").show(ui, |ui| {
+            ui.set_height(25.0);
+            ui.add_space(4.0);
+            ui.horizontal(|ui| {
+                ui.label(format!("v{}", env!("CARGO_PKG_VERSION")));
+                egui::warn_if_debug_build(ui);
+                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                    ui.hyperlink_to("Project homepage", env!("CARGO_PKG_HOMEPAGE"));
+                });
+            });
+        });
+
         egui::CentralPanel::default().show(ui, |ui| {
             ui.add_space(10.0);
 
@@ -491,19 +504,6 @@ impl eframe::App for App {
                         }
                     }
                 }
-            });
-        });
-
-        // Bottom panel with app version
-        egui::Panel::bottom("bottom_panel").show(ui, |ui| {
-            ui.set_height(25.0);
-            ui.add_space(4.0);
-            ui.horizontal(|ui| {
-                ui.label(format!("v{}", env!("CARGO_PKG_VERSION")));
-                egui::warn_if_debug_build(ui);
-                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                    ui.hyperlink_to("Project homepage", env!("CARGO_PKG_HOMEPAGE"));
-                });
             });
         });
 
