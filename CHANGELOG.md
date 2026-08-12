@@ -9,7 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Updated `eframe` dependency to `0.36.1`
+- Updated `eframe` dependency to `0.36.1`.
+- Switch back from custom theme to a modified `egui` style with better contrast.
 - Use 2024 edition of Rust.
 
 ## [1.4.0] - 2023-12-03
