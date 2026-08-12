@@ -77,7 +77,7 @@
                             Source='wix\License.rtf'
                             KeyPath='yes'/>
                     </Component>
-                    
+
                     <Directory Id='Bin' Name='bin'>
                         <Component Id='Path' Guid='0FF53C28-F348-49F0-B1AB-F2FFA40061C6' Win64='$(var.Win64)' KeyPath='yes'>
                             <Environment
@@ -109,8 +109,8 @@
 
 		<DirectoryRef Id="ApplicationProgramsFolder">
 			<Component Id="AppStart" Guid="d5886d8d-009d-4468-9db3-1ebc72f7c201">
-				<Shortcut Id="AppStartShortcut" 
-					Name="SysEx Drop" 
+				<Shortcut Id="AppStartShortcut"
+					Name="SysEx Drop"
 					Description="Drag-and-drop MIDI SysEx dump utility"
 					Target="[APPLICATIONFOLDER]bin\sysex-drop.exe"
 					WorkingDirectory="APPLICATIONROOTDIRECTORY"
@@ -119,7 +119,7 @@
 				<RegistryValue Root="HKCU" Key="Software\sourcebox\SysExDrop" Name="StartShortcut" Type="integer" Value="1" KeyPath="yes"/>
 		   </Component>
 		</DirectoryRef>
-		
+
 		<DirectoryRef Id="DesktopFolder">
 		    <Component Id="AppDesk" Guid="e7261bca-c8c3-4f7f-be81-eb3a7470bc7d">
 				<Shortcut Id="AppDeskShortcut"
@@ -132,7 +132,7 @@
 				<RegistryValue Root="HKCU" Key="Software\sourcebox\SysExDrop" Name="DeskShortcut" Type="integer" Value="1" KeyPath="yes"/>
 			</Component>
 		</DirectoryRef>
-		
+
         <Feature
             Id='Binaries'
             Title='Application'
@@ -147,7 +147,7 @@
               the license sidecar file from the installer.
             -->
             <ComponentRef Id='License'/>
-            
+
             <ComponentRef Id='binary0'/>
 
             <Feature
@@ -169,9 +169,9 @@
 			Display='expand'
 			Absent='disallow'>
 
-			<ComponentRef Id="AppStart" /> 
+			<ComponentRef Id="AppStart" />
 		</Feature>
-		
+
 		<Feature
 			Id='DeskShort'
 			Title='Desktop shortcut'
@@ -181,12 +181,12 @@
 			Display='expand'
 			Absent='disallow'>
 
-			<ComponentRef Id="AppDesk" /> 
+			<ComponentRef Id="AppDesk" />
 		</Feature>
 
         <SetProperty Id='ARPINSTALLLOCATION' Value='[APPLICATIONFOLDER]' After='CostFinalize'/>
 
-        
+
         <!--
           Uncomment the following `Icon` and `Property` tags to change the product icon.
 
@@ -197,7 +197,7 @@
         <Property Id='ARPPRODUCTICON' Value='ProductICO' />
 
         <Property Id='ARPHELPLINK' Value='https://github.com/sourcebox/sysex-drop'/>
-        
+
         <UI>
             <UIRef Id='WixUI_FeatureTree'/>
             <!--
@@ -209,7 +209,7 @@
             -->
             <!--<Publish Dialog='WelcomeDlg' Control='Next' Event='NewDialog' Value='CustomizeDlg' Order='99'>1</Publish>-->
             <!--<Publish Dialog='CustomizeDlg' Control='Back' Event='NewDialog' Value='WelcomeDlg' Order='99'>1</Publish>-->
-            
+
         </UI>
 
         <!--
@@ -217,10 +217,10 @@
           or removing the following `WixVariable` tag
         -->
         <WixVariable Id='WixUILicenseRtf' Value='wix\License.rtf'/>
-        
-        
+
+
         <!--
-          Uncomment the next `WixVaraible` tag to customize the installer's
+          Uncomment the next `WixVariable` tag to customize the installer's
           Graphical User Interface (GUI) and add a custom banner image across
           the top of each screen. See the WiX Toolset documentation for details
           about customization.
@@ -229,7 +229,7 @@
         -->
         <!--<WixVariable Id='WixUIBannerBmp' Value='wix\Banner.bmp'/>-->
 
-        
+
         <!--
           Uncomment the next `WixVariable` tag to customize the installer's
           Graphical User Interface (GUI) and add a custom image to the first
