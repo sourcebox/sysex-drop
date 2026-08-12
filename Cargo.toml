@@ -15,14 +15,11 @@ log = { version = "0.4.33", features = [
   "max_level_debug",
   "release_max_level_info",
 ] }
-midir = "0.9.1"
+midir = "0.11.0"
 midly = "0.5.3"
 serde = { version = "1.0.229", features = ["derive"] }
 simple_logger = "5.2.0"
-
-[dependencies.eframe]
-version = "0.36.1"
-features = ["persistence"]
+eframe = { version = "0.36.1", features = ["persistence"] }
 
 [profile.release]
 strip = true
