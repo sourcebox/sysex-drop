@@ -3,14 +3,17 @@
 #![warn(missing_docs)]
 
 mod midi;
-mod theme;
 
 use std::io::{BufRead, BufReader, Seek};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
 use anyhow::{anyhow, Result};
-use eframe::egui;
+use eframe::egui::{
+    self,
+    style::{Spacing, TextStyle},
+    vec2, FontFamily, FontId, Margin,
+};
 use simple_logger::SimpleLogger;
 
 /// Size of the native application window
@@ -40,8 +43,36 @@ fn main() {
         "SysEx Drop",
         native_options,
         Box::new(|cc| {
-            cc.egui_ctx.set_style(theme::style());
-            Box::new(App::new(cc))
+            cc.egui_ctx.all_styles_mut(|style| {
+                style.text_styles = [
+                    (
+                        TextStyle::Small,
+                        FontId::new(11.0, FontFamily::Proportional),
+                    ),
+                    (TextStyle::Body, FontId::new(14.0, FontFamily::Proportional)),
+                    (
+                        TextStyle::Button,
+                        FontId::new(14.0, FontFamily::Proportional),
+                    ),
+                    (
+                        TextStyle::Heading,
+                        FontId::new(18.0, FontFamily::Proportional),
+                    ),
+                    (
+                        TextStyle::Monospace,
+                        FontId::new(14.0, FontFamily::Monospace),
+                    ),
+                ]
+                .into();
+                style.spacing = Spacing {
+                    item_spacing: vec2(6.0, 6.0),
+                    window_margin: Margin::same(8),
+                    button_padding: vec2(16.0, 5.0),
+                    icon_width: 16.0,
+                    ..Default::default()
+                };
+            });
+            Ok(Box::new(App::new(cc)))
         }),
     )
     .ok();
@@ -227,38 +258,44 @@ impl eframe::App for App {
         eframe::set_value(storage, eframe::APP_KEY, self);
     }
 
-    /// Called each time the UI needs repainting, which may be many times per second.
-    fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        // Set initial always-on-top state and zoom factor once on startup.
-        if self.frame_count == 1 {
-            ctx.send_viewport_cmd(egui::ViewportCommand::WindowLevel(if self.always_on_top {
-                egui::WindowLevel::AlwaysOnTop
-            } else {
-                egui::WindowLevel::Normal
-            }));
-            ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(
-                WINDOW_SIZE * self.zoom_factor,
-            ));
-        }
-
-        let zoom_factor = ctx.zoom_factor();
-        if self.zoom_factor != zoom_factor {
-            ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(WINDOW_SIZE * zoom_factor));
-            self.zoom_factor = zoom_factor;
-        }
-
-        // Continuous run mode is required for message processing
-        ctx.request_repaint_after(Duration::from_millis(1000 / FPS_LIMIT as u64));
-
+    fn logic(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         while let Ok(message) = self.message_channel.1.try_recv() {
             self.process_message(&message, ctx);
         }
 
-        egui::CentralPanel::default().show(ctx, |ui| {
+        // Continuous run mode is required for message processing
+        ctx.request_repaint_after(Duration::from_millis(1000 / FPS_LIMIT as u64));
+    }
+
+    /// Called each time the UI needs repainting, which may be many times per second.
+    fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
+        // Set initial always-on-top state and zoom factor once on startup.
+        if self.frame_count == 1 {
+            ui.ctx()
+                .send_viewport_cmd(egui::ViewportCommand::WindowLevel(if self.always_on_top {
+                    egui::WindowLevel::AlwaysOnTop
+                } else {
+                    egui::WindowLevel::Normal
+                }));
+            ui.ctx().send_viewport_cmd(egui::ViewportCommand::InnerSize(
+                WINDOW_SIZE * self.zoom_factor,
+            ));
+        }
+
+        let zoom_factor = ui.ctx().zoom_factor();
+        if self.zoom_factor != zoom_factor {
+            ui.ctx()
+                .send_viewport_cmd(egui::ViewportCommand::InnerSize(WINDOW_SIZE * zoom_factor));
+            self.zoom_factor = zoom_factor;
+        }
+
+        egui::CentralPanel::default().show(ui, |ui| {
             ui.add_space(10.0);
 
             ui.scope(|ui| {
-                ui.set_enabled(self.transfer_state != TransferState::Running);
+                if self.transfer_state == TransferState::Running {
+                    ui.disable();
+                }
 
                 device_selection(
                     ui,
@@ -274,7 +311,7 @@ impl eframe::App for App {
                     ui.set_height(70.0);
 
                     ui.centered_and_justified(|ui| {
-                        if !ctx.input(|i| i.raw.hovered_files.is_empty())
+                        if !ui.ctx().input(|i| i.raw.hovered_files.is_empty())
                             && self.transfer_state != TransferState::Running
                         {
                             // Files hovered
@@ -311,29 +348,23 @@ impl eframe::App for App {
                     });
 
                     // Files dropped
-                    if !ctx.input(|i| i.raw.dropped_files.is_empty())
+                    if !ui.ctx().input(|i| i.raw.dropped_files.is_empty())
                         && self.transfer_state != TransferState::Running
                     {
-                        let dropped_files = ctx.input(|i| i.raw.dropped_files.clone());
-                        for file in &dropped_files {
-                            if let Some(path) = &file.path {
-                                self.transfer_progress = 0.0;
-                                self.transfer_state = TransferState::Idle;
-                                match self.process_file(path) {
-                                    Ok(()) => {
-                                        self.error_message = None;
-                                        if self.auto_start {
-                                            self.message_channel
-                                                .0
-                                                .send(Message::StartTransfer)
-                                                .ok();
-                                        }
-                                    }
-                                    Err(error) => {
-                                        self.error_message = Some(error.to_string());
+                        let dropped_files = ui.ctx().input(|i| i.raw.dropped_files.clone());
+                        if let Some(file) = dropped_files.into_iter().next() {
+                            self.transfer_progress = 0.0;
+                            self.transfer_state = TransferState::Idle;
+                            match self.process_file(file.path()) {
+                                Ok(()) => {
+                                    self.error_message = None;
+                                    if self.auto_start {
+                                        self.message_channel.0.send(Message::StartTransfer).ok();
                                     }
                                 }
-                                break;
+                                Err(error) => {
+                                    self.error_message = Some(error.to_string());
+                                }
                             }
                         }
                     }
@@ -349,7 +380,8 @@ impl eframe::App for App {
                         ui.add_sized(
                             [70.0, 20.0],
                             egui::DragValue::new(&mut self.packet_interval)
-                                .clamp_range(std::ops::RangeInclusive::new(1, 5000))
+                                .range(std::ops::RangeInclusive::new(1, 5000))
+                                .clamp_existing_to_range(true)
                                 .speed(1.0),
                         )
                         .on_hover_text("Hold SHIFT while dragging\n for fine-adjustments");
@@ -366,13 +398,14 @@ impl eframe::App for App {
                             ui.checkbox(&mut always_on_top, "Always on top")
                                 .on_hover_text("Keep application window on top of others");
                             if always_on_top != self.always_on_top {
-                                ctx.send_viewport_cmd(egui::ViewportCommand::WindowLevel(
-                                    if always_on_top {
-                                        egui::WindowLevel::AlwaysOnTop
-                                    } else {
-                                        egui::WindowLevel::Normal
-                                    },
-                                ));
+                                ui.ctx()
+                                    .send_viewport_cmd(egui::ViewportCommand::WindowLevel(
+                                        if always_on_top {
+                                            egui::WindowLevel::AlwaysOnTop
+                                        } else {
+                                            egui::WindowLevel::Normal
+                                        },
+                                    ));
                                 self.always_on_top = always_on_top;
                             }
                         });
@@ -384,7 +417,9 @@ impl eframe::App for App {
             ui.add_space(20.0);
 
             ui.scope(|ui| {
-                ui.set_enabled(self.file_path.is_some() && self.error_message.is_none());
+                if !(self.file_path.is_some() && self.error_message.is_none()) {
+                    ui.disable();
+                }
 
                 ui.horizontal(|ui| {
                     ui.vertical(|ui| {
@@ -459,7 +494,7 @@ impl eframe::App for App {
         });
 
         // Bottom panel with app version
-        egui::TopBottomPanel::bottom("bottom_panel").show(ctx, |ui| {
+        egui::Panel::bottom("bottom_panel").show(ui, |ui| {
             ui.set_height(25.0);
             ui.add_space(4.0);
             ui.horizontal(|ui| {
@@ -664,9 +699,11 @@ pub fn device_selection(
         });
 
         ui.scope(|ui| {
-            ui.set_enabled(!device_list.is_empty());
+            if device_list.is_empty() {
+                ui.disable();
+            }
 
-            let combo_box = egui::ComboBox::from_id_source("device_list")
+            let combo_box = egui::ComboBox::from_id_salt("device_list")
                 .width(ui.available_width())
                 .show_index(ui, &mut device_index, device_list.len(), |i| {
                     if device_count > 0 {
